@@ -24,7 +24,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv("django-insecure-shvd^o!9)8w9&w56bv7n@p&(^syo$&$wsw2sh6*jp56%d&8%kg")
+SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "django-insecure-shvd^o!9)8w9&w56bv7n@p&(^syo$&$wsw2sh6*jp56%d&8%kg")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -41,7 +41,7 @@ except Exception as e:
     LOCAL_IP = "127.0.0.1"  # Fallback to localhost if error occurs
 
 # Allow local and network access
-ALLOWED_HOSTS = ["127.0.0.1", LOCAL_IP, "localhost"]
+ALLOWED_HOSTS = ["127.0.0.1", LOCAL_IP, "localhost", "sams-f3zy.onrender.com"]
 
 # Application definition
 
@@ -146,7 +146,7 @@ EMAIL_PORT = 587  # Use 465 if you need SSL
 EMAIL_USE_TLS = True
 EMAIL_USE_SSL = False
 EMAIL_HOST_USER = "apikey"  # This is the literal string "apikey"
-EMAIL_HOST_PASSWORD = os.getenv("SENDGRID_API_KEY", "") # Replace with the API Key from Step 2
+EMAIL_HOST_PASSWORD = os.getenv("SENDGRID_API_KEY") # Replace with the API Key from Step 2
 DEFAULT_FROM_EMAIL = "alvin10381@gmail.com"  # Replace with your verified sender email
 
 CACHES = {

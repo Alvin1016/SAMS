@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SAMS - Registration</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;            
+        }
+
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            background-color: #EDF1F7;
+        }
+        .page-wrapper {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            background-color: #EDF1F7;
+        }
+        .navbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background-color: white;
+            padding: 10px 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            height: 50px;
+            border-bottom: 1px solid #ffffff;
+        }
+        .navbar-brand {
+            color: #012970;
+            font-size: 20px;
+            font-weight: bold;
+        }
+        .container {
+            display: flex;
+            flex-grow: 1;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .registration-form {
+            width: 100%;
+            max-width: 600px;
+            background-color: white;
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        .form-title {
+            text-align: center;
+            color: #012970;
+            margin-bottom: 25px;
+            font-size: 22px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-row {
+            display: flex;
+            gap: 15px;
+        }
+        .form-row .form-group {
+            flex: 1;
+        }
+        .form-label {
+            display: block;
+            margin-bottom: 6px;
+            color: #012970;
+            font-size: 13px;
+        }
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        .signup-btn {
+            width: 100%;
+            padding: 12px;
+            background-color: #1877f2;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 15px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: 10px;
+        }
+        .signup-btn:hover {
+            background-color: #166fe5;
+        }
+        .login-link {
+            text-align: center;
+            margin-top: 15px;
+            font-size: 13px;
+            color: #606770;
+        }
+        .login-link a {
+            color: #1877f2;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        @media (max-width: 480px) {
+            .form-row {
+                flex-direction: column;
+                gap: 15px;
+            }
+            .registration-form {
+                width: 95%;
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="page-wrapper">
+        <nav class="navbar">
+            <div class="navbar-brand">SAMS</div>
+        </nav>
+        <div class="container">
+            <div class="registration-form">
+                <h2 class="form-title">Registration Form</h2>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="firstName" class="form-label">First Name</label>
+                        <input type="text" id="firstName" class="form-control" placeholder="Enter first name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="lastName" class="form-label">Last Name</label>
+                        <input type="text" id="lastName" class="form-control" placeholder="Enter last name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="gender" class="form-label">Gender</label>
+                        <select id="gender" class="form-control" required>
+                            <option>Select gender</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                        </select>
+                    </div>
+                </div>
+
+                <br>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="phNumber" class="form-label">Phone Number</label>
+                        <input type="phNumber" id="phNumber" class="form-control"placeholder="Enter phone number"  required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" id="email" class="form-control" placeholder="Enter email" required>
+                    </div>                    
+                </div>
+
+                <br>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="password" class="form-label">Password</label>
+                        <input type="password" id="password" class="form-control" placeholder="Enter password" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="confirmPassword" class="form-label">Confirm Password</label>
+                        <input type="password" id="confirmPassword" class="form-control" placeholder="Confirm password" required>
+                    </div>
+                </div>
+
+                <button class="signup-btn" id="signup-btn">Sign Up</button>
+                <div class="login-link">
+                   Already have an account? <a href="{% url 'login' %}">Login here</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        document.getElementById('signup-btn').addEventListener('click', function() {
+          // 1) Grab values from inputs
+          const firstName = document.getElementById('firstName').value.trim();
+          const lastName = document.getElementById('lastName').value.trim();
+          const gender = document.getElementById('gender').value;
+          const phNumber = document.getElementById('phNumber').value.trim();
+          const email = document.getElementById('email').value.trim();
+          const password = document.getElementById('password').value.trim();
+          const confirmPassword = document.getElementById('confirmPassword').value.trim();
+      
+          // 2) Basic validation
+          if (!firstName || !lastName || !gender || !phNumber || !email || !password || !confirmPassword) {
+            alert("Please fill in all fields.");
+            return;
+          }
+
+          // ✅ Validate first name & last name (Only alphabets, no numbers/special characters)
+          let nameRegex = /^[A-Za-z\s-]+$/;
+          if (!nameRegex.test(firstName)) {
+                alert("⚠️ First name should contain only alphabets (no numbers or special characters).");
+                return;
+          }
+          if (!nameRegex.test(lastName)) {
+                alert("⚠️ Last name should contain only alphabets (no numbers or special characters).");
+                return;
+          }
+
+          // ✅ Validate phone number (Only digits, 10-11 digits)
+          let phoneRegex = /^[0-9]{10,11}$/;
+          if (!phoneRegex.test(phNumber)) {
+          alert("⚠️ Phone number should be 10-11 digits long and contain only numbers.");
+          return;
+          }
+
+          // ✅ Validate email (Must end with @student.tarc.edu.my)
+          let emailRegex = /^[a-zA-Z0-9._%+-]+@student\.tarc\.edu\.my$/;
+          if (!emailRegex.test(email)) {
+          alert("⚠️ Please enter a valid TARUMT student email (e.g., example@student.tarc.edu.my).");
+          return;
+          }
+
+          // ✅ Validate password (At least 6 characters & at least one special character)
+         let passwordRegex = /^(?=.*[!@#$%^&*(),.?":{}|<>]).{6,}$/;
+         if (!passwordRegex.test(password)) {
+             alert("⚠️ Password must be at least 6 characters long and contain at least one special character (e.g., @, #, $, %).");
+             return;
+         }
+
+
+      
+          if (password !== confirmPassword) {
+            alert("Passwords do not match!");
+            return;
+          }
+      
+          // 3) Create data object
+          const data = {
+            firstName,
+            lastName,
+            gender,
+            phNumber,
+            email,
+            password
+          };
+      
+          // 4) Send data to backend
+          fetch('/attendanceRecordingQR/register_user/', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRFToken': getCSRFToken() // We'll define getCSRFToken() below
+            },
+            body: JSON.stringify(data)
+          })
+          .then(response => response.json())
+          .then(result => {
+            if (result.success) {
+              alert("Registration successful! Check your email for your User ID." );
+                document.getElementById('firstName').value = "";
+                document.getElementById('lastName').value = "";
+                document.getElementById('gender').value = "";
+                document.getElementById('phNumber').value = "";
+                document.getElementById('email').value = "";
+                document.getElementById('password').value = "";
+                document.getElementById('confirmPassword').value = "";
+                window.location.href = "{% url 'login' %}";
+            } else {
+              alert("Registration failed: " + result.message);
+            }
+          })
+          .catch(error => {
+            console.error("Error:", error);
+            alert("An error occurred. Please try again.");
+          });
+        });
+      
+        // Helper function to get CSRF token for Django
+        function getCSRFToken() {
+          // If your CSRF cookie is named "csrftoken"
+          const cookieValue = document.cookie.split('; ')
+            .find(row => row.startsWith('csrftoken='));
+          return cookieValue ? cookieValue.split('=')[1] : '';
+        }
+      </script>
+</body>
+</html>

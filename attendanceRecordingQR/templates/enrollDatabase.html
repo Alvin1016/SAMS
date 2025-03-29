@@ -1,0 +1,32 @@
+{% extends "admin/base_site.html" %}
+{% block content %}
+  <h2>📘 Enroll selected students to a course</h2>
+
+  <form method="POST">{% csrf_token %}
+    <label>Select Course:</label>
+    <select name="course" required>
+      {% for course in courses %}
+        <option value="{{ course.courseID }}">{{ course.courseName }}</option>
+      {% endfor %}
+    </select>
+    <br><br>
+
+    <!-- Hidden fields to preserve selected student IDs -->
+    {% for student in students %}
+      <input type="hidden" name="{{ action_checkbox_name }}" value="{{ student.pk }}">
+    {% endfor %}
+
+    <!-- Hidden fields to trigger the action again -->
+    <input type="hidden" name="action" value="Enroll_students">
+    <input type="hidden" name="apply" value="true">
+
+    <button type="submit">✅ Enroll Students</button>
+  </form>
+
+  <h3>👨‍🎓 Selected Students:</h3>
+  <ul>
+    {% for student in students %}
+      <li>{{ student.userID }} - {{ student.fName }}</li>
+    {% endfor %}
+  </ul>
+{% endblock %}

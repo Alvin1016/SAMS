@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Attendance Management System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;            
+        }
+
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+        .page-wrapper {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            background-color: #EDF1F7;
+        }
+        .navbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background-color: white;
+            padding: 10px 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            height: 50px;
+            border-bottom: 1px solid #ffffff;
+            position: relative;
+           
+        }
+        .navbar-brand {
+            color: #012970;
+            font-size: 20px;
+            font-weight: bold;
+        }
+        .container {
+            display: flex;
+            flex-grow: 1;
+        }
+        .left-section {
+            flex: 1.2;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 40px;
+            background-color: #EDF1F7;
+        }
+        .left-section h1 {
+            font-size: 3.5vw;
+            line-height: 1.2;
+            margin-bottom: 10px;
+            max-width: 500px;
+        }
+        .right-section {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+            background-color: #EDF1F7;
+        }
+        .login-form {
+            width: 100%;
+            max-width: 500px;
+            background-color: white;
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            margin-left: -90px;
+        }
+
+        .form-group {
+        margin-bottom: 20px;
+        }
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            color: #012970;
+            font-size: 14px;
+        }
+        .user-type {
+            display: flex;
+            margin-bottom: 25px;
+            gap: 10px;
+        }
+        .user-type label {
+            flex: 1;
+            text-align: center;
+            padding: 12px;
+            border: 1px solid #ddd;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+        }
+        .user-type input[type="radio"] {
+            display: none;
+        }
+        .user-type input[type="radio"]:checked + label {
+            background-color: #1877f2;
+            color: white;
+            border-color: #1877f2;
+        }
+        .login-form input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 16px;
+        }
+        .login-btn {
+            width: 100%;
+            padding: 12px;
+            background-color: #1877f2;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 15px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .login-btn:hover {
+            background-color: #166fe5;
+        }
+        .forgot-password {
+            text-align: center;
+            margin-top: 15px;
+        }
+        .forgot-password a {
+            color: #1877f2;
+            text-decoration: none;
+            font-size: 14px;
+        }
+        .register {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 14px;
+            color: #606770;
+        }
+        .register a {
+            color: #1877f2;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+            .left-section, .right-section {
+                flex: 1;
+                padding: 20px;
+            }
+            .left-section h1 {
+                font-size: 5vw;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="page-wrapper">
+        <nav class="navbar">
+            <div class="navbar-brand">SAMS</div>
+        </nav>
+        <div class="container">
+            <div class="left-section">
+                <h1 style="color:#212529;">Smart</h1>
+                <h1 style="color:#012970;">Attendance</h1>
+                <h1 style="color:#012970;">Management System</h1>
+            </div>
+            <div class="right-section">
+                <div class="login-form">
+                    <div class="user-type">
+                        <input type="radio" id="staff" name="user-type" checked>
+                        <label for="staff">Staff</label>
+                        <input type="radio" id="student" name="user-type">
+                        <label for="student">Student</label>
+                    </div>
+                    <div class="form-group">
+                        <label for="userIdOrEmail" class="form-label">User ID/E-mail</label>
+                        <input type="text" id="userIdOrEmail" placeholder="Enter User ID/E-mail" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password" class="form-label">Password</label>
+                        <input type="password" id="password" placeholder="Enter Password" required>
+                    </div>
+                    <button class="login-btn" id="login-btn">Sign in</button>                
+
+                    <div class="forgot-password">
+                        <a href="{% url 'reset_password_request_otp' %}">Forgot password?</a>
+                    </div>
+                    <div class="register">
+                        Don't have an account? <a href="{% url 'registration' %}">Register here</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('login-btn').addEventListener('click', function() {
+            const isStaff = document.getElementById('staff').checked;   // or student
+            const userType = isStaff ? 'Staff' : 'Student';
+            const userIdOrEmail = document.getElementById('userIdOrEmail').value.trim();
+            const password = document.getElementById('password').value.trim();
+            
+            if (!userIdOrEmail || !password) {
+                alert("Please enter User ID/Email and Password.");
+                return;
+            }
+        
+            const data = {
+                userType: userType,
+                userIdOrEmail: userIdOrEmail,
+                password: password
+            };
+        
+            fetch('/attendanceRecordingQR/user_login/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCSRFToken()
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.success) {
+
+                    alert("Login successful! OTP sent to your email.");
+                    sessionStorage.setItem("userIdOrEmail", userIdOrEmail);
+
+                    // Redirect to dashboard or staff/student page
+                    document.getElementById('userIdOrEmail').value = "";
+                    document.getElementById('password').value = "";                   
+                    window.location.href = result.redirectUrl; 
+                } else {
+                    alert("Login failed: " + result.message);
+                    document.getElementById('password').value = ""; 
+                    
+                }
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                alert("An error occurred. Please try again.");
+            });
+        });
+        
+        // Helper function to get CSRF token for Django
+        function getCSRFToken() {
+            const cookieValue = document.cookie.split('; ')
+              .find(row => row.startsWith('csrftoken='));
+            return cookieValue ? cookieValue.split('=')[1] : '';
+        }
+
+
+
+
+
+
+        function loginUser() {
+            let userIdOrEmail = document.getElementById("userIdOrEmail").value;
+            let password = document.getElementById("password").value;
+            let userType = document.querySelector('input[name="user-type"]:checked').id;
+
+            fetch("/attendanceRecordingQR/", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ userId, password, userType })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                    document.getElementById("otp-section").style.display = "block";
+                    sessionStorage.setItem("userIdOrEmail", userIdOrEmail);
+                } else {
+                    alert(data.message);
+                }
+            });
+        }
+    
+        </script>
+
+</body>
+</html>
+

@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SAMS - Student Management</title>
+    {% load static %}
+    <link rel="stylesheet" type="text/css" href="{% static '/style.css' %}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+
+    <style>
+        .student-filters {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            flex: 1;
+        }
+        .filter-group label {
+            font-size: 14px;
+            color: #012970;
+        }
+        .filter-group select, .filter-group button {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        .filter-group button {
+            background-color: #1877f2;
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+        .filter-group button:hover {
+            background-color: #0d6efd;
+        }
+        .student-table {
+            width: 100%;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .student-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .student-table thead {
+            background-color: #f8f9fa;
+        }
+        .student-table th, .student-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        .student-table th {
+            color: #012970;
+            font-weight: bold;
+        }
+        .student-table tr:hover {
+            background-color: #f1f5fb;
+        }
+        .attendance-badge {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .attendance-high {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .attendance-medium {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        .attendance-low {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .action-icons {
+            display: flex;
+            gap: 10px;
+        }
+        .action-icons a {
+            color: #012970;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        .action-icons a:hover {
+            color: #1877f2;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="navbar-brand">
+            <a href="{% url 'dashboard' %}">SAMS</a>
+        </div>
+        <a href="{% url 'profile' %}" class="header-profile">
+            <div class="profile-img" id="profileImg"></div>
+            <span>{{ request.session.user_name }}</span>
+        </a>
+    </nav>
+    
+    <div class="dashboard-container">
+        <div class="sidebar">            
+            <ul class="sidebar-menu">
+                <li><a href="{% url 'dashboard' %}"><i class="fas fa-chart-line"></i> Dashboard</a></li>
+                <li><a href="{% url 'attendanceTracking' %}"><i class="fas fa-chart-pie"></i> Attendance Recording</a></li>
+                <li><a href="{% url 'student' %}"><i class="fas fa-user-graduate"></i> Student</a></li>
+                <li><a href="{% url 'report' %}"><i class="fas fa-file-alt"></i> Report</a></li>                
+                <li><a href="{% url 'logout' %}"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+            </ul>
+        </div>
+        
+        <div class="main-content">
+            <h1 style="margin-bottom: 20px; color: #4154F1;">Student Management</h1>
+            
+            <div class="student-filters">
+                <div class="filter-group">
+                    <label for="course">Course Name</label>
+                    <select id="course">
+                        <option value="">Select Course</option>
+                        {% for course in courses %}
+                            <option value="{{ course.courseID }}">{{ course.courseName }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label for="attendance">Attendance</label>
+                    <select id="attendance">
+                        <option value="">All</option>
+                        <option value="above">Above 80%</option>
+                        <option value="below">Below 80%</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>&nbsp;</label>
+                    <button id="searchBtn">
+                        <i class="fas fa-search"></i> Search
+                    </button>
+                </div>
+                <div class="filter-group">
+                    <label>&nbsp;</label>
+                    <button id="generateBarlistBtn">
+                        <i class="fas fa-chart-bar"></i> Generate Bar List
+                    </button>
+                </div>  
+            </div>          
+
+                <div class="student-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Student ID</th>
+                                <th>Student Name</th>
+                                <th>Course Name</th>
+                                <th>Attendance</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="studentTableBody"></tbody>
+                    </table>
+                </div>
+        </div>
+    </div>
+
+    <script>
+         document.addEventListener("DOMContentLoaded", function() {
+        let firstName = "{{ request.session.user_name }}";  // Get from session (or other source)
+        
+        if (firstName) {
+            let firstLetter = firstName.charAt(0).toUpperCase();  // Get first letter
+            document.getElementById("profileImg").innerText = firstLetter;  // Set as profile icon
+        }
+    });
+
+            function updateActiveMenu() {
+        const menuLinks = document.querySelectorAll('.sidebar-menu a');
+        const currentPath = window.location.pathname;
+
+        menuLinks.forEach(link => {
+            const linkPath = new URL(link.href, window.location.origin).pathname;  // Get absolute path
+
+            if (currentPath === linkPath || 
+                (linkPath === '/' && currentPath === '/student')) {
+                menuLinks.forEach(l => l.classList.remove('active'));
+                link.classList.add('active');
+            }
+        });
+    }
+
+    // ✅ Run on page load
+    document.addEventListener('DOMContentLoaded', updateActiveMenu);
+
+    // ✅ Run on every navigation (for Single Page Applications)
+    window.addEventListener('popstate', updateActiveMenu);
+
+
+
+    document.getElementById("searchBtn").addEventListener("click", function () {
+    let selectedCourse = document.getElementById("course").value;
+    let selectedAttendance = document.getElementById("attendance").value;
+    let studentTableBody = document.getElementById("studentTableBody");
+
+
+    if (!selectedCourse) {
+        alert("Please select a course!");
+        return;
+    }
+
+    console.log("Fetching students for course:", selectedCourse, " with attendance filter:", selectedAttendance);
+
+    // ✅ Fetch students based on selected course
+    fetch(`/attendanceRecordingQR/get_students_by_course/${selectedCourse}/`)
+        .then(response => response.json())
+        .then(data => {
+            studentTableBody.innerHTML = ""; // Clear table
+            console.log("Received students data:", data.students);
+
+            // ✅ Apply attendance filtering AFTER fetching students
+            let filteredStudents = data.students.filter(student => {
+                if (selectedAttendance === "above") {
+                    return student.attendance >= 80;
+                } else if (selectedAttendance === "below") {
+                    return student.attendance < 80;
+                }
+                return true; // If "All" is selected, return all students
+            });
+
+            // ✅ Render only the students matching BOTH filters
+            if (filteredStudents.length > 0) {
+                filteredStudents.forEach(student => {
+                    let row = `
+                        <tr>
+                            <td>${student.id}</td>
+                            <td>${student.name}</td>
+                            <td>${student.course}</td>
+                            <td><span class="attendance-badge ${getAttendanceBadgeClass(student.attendance)}">${student.attendance}%</span></td>
+                            <td class="action-icons">
+                                <a href="mailto:${student.email}" title="Send Email">
+                                    <i class="fas fa-envelope"></i>
+                                </a>                                
+                            </td>
+                        </tr>
+                    `;
+                    studentTableBody.innerHTML += row;
+                });
+            } else {
+                studentTableBody.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="text-center">No students found for this course with selected attendance.</td>
+                    </tr>
+                `;
+            }
+        })
+
+        .catch(error => {
+            console.error("Error generating bar list:", error);
+            alert("Failed to generate the bar list.");
+        });
+        
+});
+
+    // ✅ Function to get attendance badge color
+    function getAttendanceBadgeClass(attendance) {
+        if (attendance >= 80) return "attendance-high";
+        if (attendance < 80) return "attendance-low";
+        return "attendance-medium";
+    }
+
+
+
+
+    document.getElementById("generateBarlistBtn").addEventListener("click", function () {
+    let selectedCourse = document.getElementById("course").value;
+    let courseDropdown = document.getElementById("course");
+    let selectedCourseName = courseDropdown.options[courseDropdown.selectedIndex].text; // Get course name
+    let safeCourseName = selectedCourseName.replace(/[^a-zA-Z0-9 ]/g, "").replace(/\s+/g, "_");
+
+    if (!selectedCourse) {
+        alert("⚠ Please select a course first!");
+        return;
+    }
+
+    console.log("📢 Generating Bar List PDF for course:", selectedCourse);
+    console.log(`Generating Bar List for Course: ${selectedCourse} - ${safeCourseName}`);
+
+    fetch(`/attendanceRecordingQR/get_students_by_course/${selectedCourse}/`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error("Network response was not OK");
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (!data.students || data.students.length === 0) {
+                alert("⚠ No students found for this course.");
+                return;
+            }
+
+            let { jsPDF } = window.jspdf;
+            let doc = new jsPDF();
+            doc.setFontSize(14); 
+            doc.text(`SAMS - Bar List for ${safeCourseName} (Attendance Below 80%)`, 10, 15);
+
+            let rows = [];
+
+            // ✅ Filter students with attendance < 80%
+            let filteredStudents = data.students.filter(student => student.attendance < 80);
+
+            if (filteredStudents.length === 0) {
+                alert("✅ No students below 80% attendance.");
+                return;
+            }
+
+            console.log("✅ Filtered students:", filteredStudents);
+
+            filteredStudents.forEach(student => {
+                rows.push([
+                    student.id,
+                    student.name,
+                    student.course,
+                    student.attendance + "%" // Add % symbol
+                ]);
+            });
+
+            doc.autoTable({
+                head: [["Student ID", "Student Name", "Course Name", "Attendance"]],
+                body: rows,
+                startY: 20,
+            });
+
+            
+            // ✅ Auto download the PDF
+            doc.save(`Bar_List_${selectedCourseName}.pdf`);
+        })
+        .catch(error => {
+            console.error("❌ Error generating bar list PDF:", error);
+            alert("⚠ Failed to generate bar list. Please try again.");
+        });
+});
+
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SAMS - Report Generation</title>
+    {% load static %}
+    <link rel="stylesheet" type="text/css" href="{% static '/style.css' %}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+
+    <style>
+        .report-filters {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            flex: 1;
+        }
+        .filter-group label {
+            font-size: 14px;
+            color: #012970;
+        }
+        .filter-group select, .filter-group button {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        .filter-group button {
+            background-color: #1877f2;
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .filter-group button:hover {
+            background-color: #0d6efd;
+        }
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        .report-results {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            min-height: 300px;
+            justify-content: center;
+            align-items: center;
+            color: #899BBD;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="navbar-brand">
+            <a href="{% url 'dashboard' %}">SAMS</a>
+        </div>
+        <a href="{% url 'profile' %}" class="header-profile">
+            <div class="profile-img" id="profileImg"></div>
+            <span>{{ request.session.user_name }}</span>
+        </a>
+    </nav>
+    <div class="dashboard-container">
+        <div class="sidebar">            
+            <ul class="sidebar-menu">
+                <li><a href="{% url 'dashboard' %}"><i class="fas fa-chart-line"></i> Dashboard</a></li>
+                <li><a href="{% url 'attendanceTracking' %}"><i class="fas fa-chart-pie"></i> Attendance Recording</a></li>
+                <li><a href="{% url 'student' %}"><i class="fas fa-user-graduate"></i> Student</a></li>
+                <li><a href="{% url 'report' %}"><i class="fas fa-file-alt"></i> Report</a></li>                
+                <li><a href="{% url 'logout' %}"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+            </ul>
+        </div>
+        <div class="main-content">
+            <h1 style="margin-bottom: 20px; color: #4154F1;">Report</h1>
+            
+            <div class="report-filters">
+                <div class="filter-group">
+                    <label for="subject">Subject</label>
+                    <select id="subject">
+                        <option value="">Select Course</option>
+                        {% for course in courses %}
+                            <option value="{{ course.courseID }}">{{ course.courseName }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="month">Month</label>
+                    <select id="month">
+                        <option>January</option>
+                        <option>February</option>
+                        <option>March</option>
+                        <option>April</option>
+                        <option>May</option>
+                        <option>June</option>
+                        <option>July</option>
+                        <option>August</option>
+                        <option>September</option>
+                        <option>October</option>
+                        <option>November</option>
+                        <option>December</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="year">Year</label>
+                    <select id="year">
+                        <option>2023</option>
+                        <option>2024</option>
+                        <option>2025</option>                        
+                    </select>
+                </div>
+                <div class="filter-group action-buttons">
+                    <button onclick="generateReport()"><i class="fas fa-file-alt"></i> Generate Report</button>
+                    <button onclick="downloadReport()" class="download-btn"><i class="fas fa-download"></i> Download Report</button>
+                </div>
+            </div>
+
+            <div class="report-results">
+                <p style="display: flex; justify-content: center; align-items: center; padding-top: 100px;" >Select filters and click 'Generate Report' to view results</p>
+            </div>
+        </div>
+    </div>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            let firstName = "{{ request.session.user_name }}";  // Get from session (or other source)
+            
+            if (firstName) {
+                let firstLetter = firstName.charAt(0).toUpperCase();  // Get first letter
+                document.getElementById("profileImg").innerText = firstLetter;  // Set as profile icon
+            }
+        });
+
+        function updateActiveMenu() {
+            const menuLinks = document.querySelectorAll('.sidebar-menu a');
+            const currentPath = window.location.pathname;
+
+            menuLinks.forEach(link => {
+                const linkPath = new URL(link.href, window.location.origin).pathname;  // Get absolute path
+
+                if (currentPath === linkPath || 
+                    (linkPath === '/' && currentPath === '/report')) {
+                    menuLinks.forEach(l => l.classList.remove('active'));
+                    link.classList.add('active');
+                }
+            });
+        }
+
+        // ✅ Run on page load
+        document.addEventListener('DOMContentLoaded', updateActiveMenu);
+
+        // ✅ Run on every navigation (for Single Page Applications)
+        window.addEventListener('popstate', updateActiveMenu);
+
+        function generateReport() {
+        const subjectElement = document.getElementById("subject"); 
+        const subject = subjectElement.value; // Get selected value (course ID)
+        const selectedCourseName = subjectElement.options[subjectElement.selectedIndex].text;
+        const month = document.getElementById("month").value;
+        const year = document.getElementById("year").value;        
+
+
+
+        if (!subject || !month || !year) {
+            alert("Please select all filters!");
+            return;
+        }
+
+        console.log(`Fetching report for ${subject}, ${month} ${year}`);
+
+        fetch(`/attendanceRecordingQR/generate_monthly_report/${subject}/${month}/${year}/`)
+            .then(response => response.json())
+            .then(data => {
+                const reportResults = document.querySelector(".report-results");
+                reportResults.innerHTML = ""; // Clear previous report
+
+                if (data.success && data.report.length > 0) {
+                    let reportHTML = 
+                    `<div style="text-align: center; padding-top: 15px; margin-bottom: 15px;">
+                        <h3 style="font-size: 22px; color: #012970; font-weight: bold;">
+                            Report for ${selectedCourseName} - ${month} ${year}
+                        </h3>
+                    </div>  
+                
+                        <table border="1" style="width:95%; border-collapse: collapse; color: #012970; margin: auto; text-align: center;">
+                            <thead>
+                                <tr>
+                                    <th>Student ID</th>
+                                    <th>Student Name</th>
+                                    <th>Present</th>
+                                    <th>Total Classes</th>
+                                    <th>Attendance (%)</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+
+                    `
+                    ;
+
+                    data.report.forEach(student => {
+                        let rowColor = student.attendance < 80 ? " style='color: red;'" : "";
+                        reportHTML += `
+                            <tr${rowColor}>
+                                <td>${student.id}</td>
+                                <td>${student.name}</td>
+                                <td>${student.present}</td>
+                                <td>${student.total_classes}</td>
+                                <td>${student.attendance}%</td>
+                                <td>${student.status}</td>
+                            </tr>
+                        `;
+                    });
+
+                    reportHTML += `</tbody></table>`;
+                    reportResults.innerHTML = reportHTML;
+                } else {
+                    reportResults.innerHTML = `<p>No attendance data found for ${subject} - ${month} ${year}.</p>`;
+                }
+            })
+            .catch(error => {
+                console.error("Error fetching report:", error);
+                alert("Failed to generate report.");
+            });
+    }
+
+        function downloadReport() {
+        const subjectElement = document.getElementById("subject"); 
+        const subject = subjectElement.value; // Get selected value (course ID)
+        const selectedCourseName = subjectElement.options[subjectElement.selectedIndex].text;
+        const month = document.getElementById("month").value;
+        const year = document.getElementById("year").value;
+
+        if (!subject || !month || !year) {
+            alert("Please select all filters before downloading!");
+            return;
+        }
+        
+            fetch(`/attendanceRecordingQR/generate_monthly_report/${subject}/${month}/${year}/`)
+            .then(response => response.json())
+            .then(data => {
+                if (!data.success || data.report.length === 0) {
+                    alert("No data available for the selected filters.");
+                    return;
+                }
+
+                let { jsPDF } = window.jspdf;
+                let doc = new jsPDF();
+                doc.setFontSize(12);
+                doc.text(`SAMS - Attendance Report for ${selectedCourseName} - (${month} ${year})`, 10, 10);
+
+                let rows = [];
+                data.report.forEach(student => {
+                    rows.push([
+                        student.id,
+                        student.name,
+                        student.present,
+                        student.total_classes,
+                        student.attendance + "%",
+                        student.status
+                    ]);
+                });
+
+                doc.autoTable({
+                    head: [["Student ID", "Student Name", "Present", "Total Classes", "Attendance (%)", "Status"]],
+                    body: rows,
+                    startY: 20,
+                });
+
+                doc.save(`Attendance_Report_${selectedCourseName}_${month}_${year}.pdf`);
+            })
+            .catch(error => {
+                console.error("Error generating PDF:", error);
+                alert("Failed to generate report PDF.");
+            });
+        
+    }       
+    </script>
+</body>
+</html>

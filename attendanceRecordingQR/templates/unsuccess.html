@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance Recording Failed - SAMS</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+        body {
+            background-color: #EDF1F7;
+            color: #012970;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .error-container {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            padding: 40px;
+            text-align: center;
+            max-width: 500px;
+            width: 100%;
+            position: relative;
+        }
+        .error-icon {
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 20px;
+            position: relative;
+        }
+        .error-icon::before,
+        .error-icon::after {
+            content: '';
+            position: absolute;
+            background-color: #dc3545;
+            width: 15px;
+            height: 80px;
+            top: 50%;
+            left: 50%;
+            transform-origin: center;
+        }
+        .error-icon::before {
+            transform: translate(-50%, -50%) rotate(45deg);
+        }
+        .error-icon::after {
+            transform: translate(-50%, -50%) rotate(-45deg);
+        }
+        .error-title {
+            color: #dc3545;
+            margin-bottom: 15px;
+            font-size: 24px;
+        }
+        .error-details {
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        .error-details p {
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .error-details .label {
+            color: #012970;
+            font-weight: bold;
+        }
+        .error-details .value {
+            color: #dc3545;
+        }
+        .action-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+            gap: 10px;
+        }
+        .btn {
+            flex: 1;
+            display: inline-block;
+            background-color: #dc3545;
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-align: center;
+            transition: background-color 0.3s;
+        }
+        .btn:hover {
+            background-color: #a71d2a;
+        }
+       
+        @media (max-width: 480px) {
+            .error-container {
+                padding: 20px;
+            }
+            .action-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="error-container">
+        <div class="error-icon"></div>
+        <h1 class="error-title">Attendance Recording Failed</h1>
+        
+        <div class="error-details">
+            <p>Course ID: <span id="subjectID"></span></p>
+            <p>Course Name: <span id="subjectName"></span></p>
+            <p>Class Type: <span id="section"></span></p>
+            <p>Date: <span id="date"></span></p>
+            <p><span id="errorMsg"></span></p>
+        </div>
+        
+        <div class="action-buttons">
+            <a href="#" class="btn" id="close-window-btn">Close</a>
+        </div>
+    </div>
+
+    <script>
+         // 1) Create a URLSearchParams object for the current URL
+        const params = new URLSearchParams(window.location.search);
+
+        // 2) Grab each parameter (fallback to empty string if not present)
+        const subjectID   = params.get("subjectID")   || "";
+        const subjectName = params.get("subjectName") || ""; 
+        const section     = params.get("section")     || "";
+        const date        = params.get("date")        || "";
+        const errorMsg    = params.get("error")       || "";
+
+        // 3) If subject may contain pluses instead of spaces, decode it:
+        const decodedSubjectName = decodeURIComponent(subjectName);
+
+        // 4) Assign the values to your HTML elements
+        document.getElementById('subjectID').innerText   = subjectID;
+        document.getElementById('subjectName').innerText = decodedSubjectName;
+        document.getElementById('section').innerText     = section;
+        document.getElementById('date').innerText        = date;
+        document.getElementById('errorMsg').innerText    = errorMsg;
+
+        // 5) Use DOMContentLoaded for button listeners
+        document.addEventListener('DOMContentLoaded', function() {
+
+            // Close/Exit button
+            document.getElementById('close-window-btn').addEventListener('click', function(e) {
+                e.preventDefault();
+                window.location.href = "/attendanceRecordingQR/";
+            });
+
+        });
+
+        // 6) Optionally auto-close the window after a short delay (3s) if opened by a QR app
+        if (window.opener) {
+            setTimeout(() => {
+                window.close();
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

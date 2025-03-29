@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance Recorded - SAMS</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+        body {
+            background-color: #EDF1F7;
+            color: #012970;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .success-container {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            padding: 40px;
+            text-align: center;
+            max-width: 500px;
+            width: 100%;
+            position: relative;
+        }
+       
+        .success-title {
+            color: #4154F1;
+            margin-bottom: 15px;
+            font-size: 24px;
+        }
+        .success-details {
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        .success-details p {
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .success-details .label {
+            color: #012970;
+            font-weight: bold;
+        }
+        .success-details .value {
+            color: #1877f2;
+        }
+        .action-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+            gap: 10px;
+        }
+        .btn {
+            flex: 1;
+            display: inline-block;
+            background-color: #1877f2;
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-align: center;
+            transition: background-color 0.3s;
+        }
+        .btn:hover {
+            background-color: #0d6efd;
+        }
+        .btn-secondary {
+            background-color: #f8f9fa;
+            color: #012970;
+            border: 1px solid #ddd;
+        }
+        .btn-secondary:hover {
+            background-color: #e9ecef;
+        }
+        @media (max-width: 480px) {
+            .success-container {
+                padding: 20px;
+            }
+            .action-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="success-container">
+        <div class="success-tick">
+            <span style="color: #1877f2; font-size: 100px;">✔</span>
+        </div>
+        <h1 class="success-title">Attendance Recorded Successfully</h1>
+        
+        <div class="success-details">
+            <p>Course ID: <span id="subjectID"></span></p>
+            <p>Course Name: <span id="subjectName"></span></p>
+            <p>Class Type: <span id="section"></span></p>
+            <p>Date: <span id="date"></span></p>
+            <p>Time In: <span id="timeIn"></span></p>
+            <p>Time Out: <span id="timeOut"></span></p>
+        </div>
+        
+        <div class="action-buttons">
+            <a href="#" class="btn btn-secondary" id="view-details-btn">View Details</a>
+            <a href="#" class="btn" id="close-window-btn">Close</a>
+        </div>
+    </div>
+
+    <script>
+        // Create a URLSearchParams object for the current URL
+        const params = new URLSearchParams(window.location.search);
+
+        // Grab each parameter, decoding if needed
+        const subjectID   = params.get("subjectID")   || "";
+        const subjectName = params.get("subjectName") || ""; 
+        const section     = params.get("section")     || "";
+        const date        = params.get("date")        || "";
+        const timeIn      = params.get("timeIn")      || "";
+        const timeOut     = params.get("timeOut")     || "";
+
+        // Manually decode if you see pluses in subjectName
+        const decodedSubjectName = decodeURIComponent(subjectName);
+
+        // Then place values into your HTML elements
+        document.getElementById('subjectID').innerText   = subjectID;
+        document.getElementById('subjectName').innerText = decodedSubjectName;
+        document.getElementById('section').innerText     = section;
+        document.getElementById('date').innerText        = date;
+        document.getElementById('timeIn').innerText      = timeIn;
+        document.getElementById('timeOut').innerText     = timeOut;
+
+        // Populate details from URL parameters
+        document.addEventListener('DOMContentLoaded', function() {
+
+            // Close window buttons
+            document.getElementById('close-window-btn').addEventListener('click', function(e) {
+                e.preventDefault();
+                window.close();
+            });
+
+            // View details button (can be customized)
+            document.getElementById('view-details-btn').addEventListener('click', function(e) {
+                e.preventDefault();
+                window.location.href = "/attendanceRecordingQR/";
+            });
+        });
+
+        // Attempt to close the window if it was opened via QR scan
+        if (window.opener) {
+            // Close the current window after a short delay
+            setTimeout(() => {
+                window.close();
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {% load static %}
+    <link rel="stylesheet" type="text/css" href="{% static '/style.css' %}">
+    <title>SAMS - Profile</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs/qrcode.min.js"></script>
+    <style>
+        .profile-container {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            padding: 20px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .profile-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .profile-picture {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background-color: #1877f2;
+            color: white;
+            font-size: 32px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .profile-info {
+            flex: 1;
+        }
+        .profile-info h2 {
+            color: #012970;
+        }
+        .profile-field {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #f1f3f9;
+        }
+        .profile-label {
+            font-weight: bold;
+            color: #012970;
+            width: 30%;
+        }
+        .profile-value, .profile-input {
+            width: 70%;
+            text-align: right;
+        }
+        .profile-input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            text-align: left;
+            box-sizing: border-box;
+            display: none;
+        }
+        select.profile-input {
+            appearance: none;
+        }
+        .edit-btn, .save-btn {
+            width: 100%;
+            padding: 10px;
+            background-color: #1877f2;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 15px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: 10px;
+        }
+        .edit-btn:hover, .save-btn:hover {
+            background-color: #0d6efd;
+        }
+        .save-btn {
+            display: none;
+        }
+        .password-section {
+            display: none;
+            margin-top: 20px;
+        }
+        .password-section input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+        
+        .error-message {
+            color: red;
+            font-size: 12px;
+            margin-top: 5px;  /* Ensures space below the input */
+            display: flex;
+            align-items: center;
+            gap: 5px; /* Adds space between the icon and text */
+        }
+
+        .error-message span {
+            display: flex;
+            align-items: center;
+        }
+
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="navbar-brand">
+            <a href="{% url 'dashboard' %}">SAMS</a>
+        </div>
+        <div class="header-profile">
+            <div class="profile-img" id="profileImg"></div>
+            <span>{{ request.session.user_name }}</span>
+        </div>
+    </nav>
+    
+    <div class="dashboard-container">
+        <div class="sidebar">            
+            <ul class="sidebar-menu">
+                <li><a href="{% url 'dashboard' %}"><i class="fas fa-chart-line"></i> Dashboard</a></li>
+                <li><a href="{% url 'attendanceTracking' %}"><i class="fas fa-chart-pie"></i> Attendance Recording</a></li>
+                <li><a href="{% url 'student' %}"><i class="fas fa-user-graduate"></i> Student</a></li>
+                <li><a href="{% url 'report' %}"><i class="fas fa-file-alt"></i> Report</a></li>                
+                <li><a href="{% url 'logout' %}"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+            </ul>
+        </div>
+        
+        <div class="main-content">
+            <h1 style="margin-bottom: 20px; color: #4154F1;">Profile</h1>
+            
+            <div class="profile-container">
+                <div class="profile-header">
+                    <div class="profile-picture" id="profileImg2"></div>                    
+                    <div class="profile-info">
+                        <h2 id="profile-name"><span>{{ request.session.user_name }}</span></h2>
+                        <p>Staff Profile</p>
+                    </div>
+                </div>
+
+                <div class="profile-field">
+                    <span class="profile-label">User ID</span>
+                    <span class="profile-value" id="userID"></span>
+                    <input type="text" class="profile-input" id="userIDInput" value="" readonly disabled>
+                </div>
+
+                <div class="profile-field">
+                    <span class="profile-label">First Name</span>
+                    <span class="profile-value" id="firstName"></span>
+                    <input type="text" class="profile-input" id="firstNameInput" value="">
+                    <div id="firstNameError" class="error-message"></div>
+                </div>
+
+                <div class="profile-field">
+                    <span class="profile-label">Last Name</span>
+                    <span class="profile-value" id="lastName"></span>
+                    <input type="text" class="profile-input" id="lastNameInput" value="">
+                </div>
+
+                <div class="profile-field">
+                    <span class="profile-label">Gender</span>
+                    <span class="profile-value" id="gender">Male</span>
+                    <select class="profile-input" id="genderInput">
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>                        
+                    </select>
+                </div>
+
+                <div class="profile-field">
+                    <span class="profile-label">Email</span>
+                    <span class="profile-value" id="email"></span>
+                    <input type="email" class="profile-input" id="emailInput" value="">                    
+                </div>
+
+                <div class="profile-field">
+                    <span class="profile-label">Phone Number</span>
+                    <span class="profile-value" id="phoneNumber"></span>
+                    <input type="text" class="profile-input" id="phoneNumberInput" value="">                    
+                </div>
+
+                <div class="profile-field">
+                    <span class="profile-label">Mac Address</span>
+                    <span class="profile-value" id="macAddress"></span>
+                    <input type="text" class="profile-input" id="macAddressInput" value="" readonly>
+                    <button id="generateQRBtn" style=" margin-left: 10px; padding: 6px; background: #1877f2; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                        Show QR Code
+                    </button>                    
+                </div>
+                
+
+                <div id="qrCodeContainer" style="display: none; text-align: center; margin-top: 20px;">
+                    <h3>Scan this QR Code to get Mac Address</h3>
+                    <div id="qrcode" style="display: flex; justify-content: center;"></div>
+                </div>
+
+                
+
+                <div class="password-section" id="passwordSection">
+                    <h3>Change Password</h3>
+                    <input type="password" id="currentPassword" placeholder="Current Password">
+                    <input type="password" id="newPassword" placeholder="New Password">
+                    <input type="password" id="confirmPassword" placeholder="Confirm New Password">
+                </div>
+
+                <button class="edit-btn" id="editProfile">Edit Profile</button>
+                <button class="save-btn" id="saveProfile">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <script>        
+
+         document.addEventListener("DOMContentLoaded", function() {
+        let firstName = "{{ request.session.user_name }}";  // Get from session (or other source)
+        
+        if (firstName) {
+            let firstLetter = firstName.charAt(0).toUpperCase();  // Get first letter
+            document.getElementById("profileImg").innerText = firstLetter;  // Set as profile icon
+        }
+    });
+
+    document.addEventListener("DOMContentLoaded", function() {
+        let firstName = "{{ request.session.user_name }}";  // Get from session (or other source)
+        
+        if (firstName) {
+            let firstLetter = firstName.charAt(0).toUpperCase();  // Get first letter
+            document.getElementById("profileImg2").innerText = firstLetter;  // Set as profile icon
+        }
+    });
+
+
+
+        document.getElementById("editProfile").addEventListener("click", function () {
+            toggleEdit(true);
+        });
+
+        document.getElementById("saveProfile").addEventListener("click", function () {
+            toggleEdit(false);
+            saveProfileChanges();
+        });
+
+        function toggleEdit(editMode) {
+            document.querySelectorAll(".profile-value").forEach(el => el.style.display = editMode ? "none" : "inline");
+            document.querySelectorAll(".profile-input").forEach(el => el.style.display = editMode ? "inline" : "none");
+            document.getElementById("generateQRBtn").style.display = editMode ? "inline-block" : "none";
+
+            if (!editMode) {document.getElementById("qrCodeContainer").style.display = "none";}
+
+            document.getElementById("editProfile").style.display = editMode ? "none" : "block";
+            document.getElementById("saveProfile").style.display = editMode ? "block" : "none";
+            document.getElementById("passwordSection").style.display = editMode ? "block" : "none";
+        }
+        document.getElementById("generateQRBtn").style.display = "none";
+
+        document.addEventListener("DOMContentLoaded", function () {
+        fetch("/attendanceRecordingQR/get_user_profile/")
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // ✅ Populate the form fields
+                document.getElementById("userID").innerText = data.user.userID;
+                document.getElementById("userIDInput").value = data.user.userID;
+                document.getElementById("firstName").innerText = data.user.firstName;
+                document.getElementById("firstNameInput").value = data.user.firstName;
+                document.getElementById("lastName").innerText = data.user.lastName;
+                document.getElementById("lastNameInput").value = data.user.lastName;
+                document.getElementById("gender").innerText = data.user.gender;
+                document.getElementById("genderInput").value = data.user.gender;
+                document.getElementById("email").innerText = data.user.email;
+                document.getElementById("emailInput").value = data.user.email;
+                document.getElementById("phoneNumber").innerText = data.user.phoneNumber;
+                document.getElementById("phoneNumberInput").value = data.user.phoneNumber;
+                document.getElementById("macAddress").innerText = data.user.macAddress;
+                document.getElementById("macAddressInput").value = data.user.macAddress;
+            } else {
+                alert("Failed to load profile: " + data.message);
+            }
+        })
+        .catch(error => console.error("Error fetching profile:", error));
+    });
+
+
+
+    document.getElementById("saveProfile").addEventListener("click", function () {
+        event.preventDefault();
+
+        const firstName = document.getElementById("firstNameInput").value.trim();
+        const lastName = document.getElementById("lastNameInput").value.trim();
+        const gender = document.getElementById("genderInput").value;
+        const email = document.getElementById("emailInput").value.trim();
+        const phoneNumber = document.getElementById("phoneNumberInput").value.trim();
+        const macAddress = document.getElementById("macAddressInput").value.trim();
+        const currentPassword = document.getElementById("currentPassword").value;
+        const newPassword = document.getElementById("newPassword").value;
+        const confirmPassword = document.getElementById("confirmPassword").value;
+
+        // Clear previous error messages
+        document.querySelectorAll(".error-message").forEach(el => el.remove());
+
+        let isValid = true;
+
+         // ✅ Validation for required fields
+        if (!firstName) {
+            showError("firstNameInput", "⚠️ First name is required.");
+            isValid = false;
+        }
+        if (!lastName) {
+            showError("lastNameInput", "⚠️ Last name is required.");
+            isValid = false;
+        }
+        if (!gender) {
+            showError("genderInput", "⚠️ Please select a gender.");
+            isValid = false;
+        }
+        if (!email) {
+            showError("emailInput", "⚠️ Email is required.");
+            isValid = false;
+        }
+        if (!phoneNumber) {
+            showError("phoneNumberInput", "⚠️ Phone number is required.");
+            isValid = false;
+        }
+
+        // ✅ Validate first name & last name (Only alphabets, no numbers/special characters)
+        let nameRegex = /^[A-Za-z\s-]+$/;
+        if (!nameRegex.test(firstName)) {
+            showError("firstNameInput", "⚠️ First name must only contain alphabets.");
+            isValid = false;
+        }
+        if (!nameRegex.test(lastName)) {
+            showError("lastNameInput", "⚠️ Last name must only contain alphabets.");
+            isValid = false;
+        }
+
+            // ✅ Validate phone number (Only digits, 10-11 digits)
+        let phoneRegex = /^[0-9]{10,11}$/;
+        if (!phoneRegex.test(phoneNumber)) {
+            showError("phoneNumberInput", "⚠️ Phone number must be 10-11 digits long.");
+            isValid = false;
+        }
+
+        // ✅ Validate email (Must end with @student.tarc.edu.my)
+        let emailRegex = /^[a-zA-Z0-9._%+-]+@student\.tarc\.edu\.my$/;
+        if (!emailRegex.test(email)) {
+            showError("emailInput", "⚠️ Email must end with @student.tarc.edu.my.");
+            isValid = false;
+        }
+
+
+        // ✅ Validate password (Only if changing password)
+        if (newPassword || confirmPassword) {
+            if (newPassword.length < 6 || !/[!@#$%^&*(),.?":{}|<>]/.test(newPassword)) {
+                showError("newPassword", "⚠️ Password must be at least 6 characters and contain 1 special character.");
+                isValid = false;
+            }
+            if (newPassword !== confirmPassword) {
+                showError("confirmPassword", "⚠️ Passwords do not match.");
+                isValid = false;
+            }           
+        }
+
+        if (!isValid) {
+                console.log("❌ Validation failed. Fix errors before saving.");
+                return;
+            }
+
+        const userData = {
+            firstName: document.getElementById("firstNameInput").value,
+            lastName: document.getElementById("lastNameInput").value,
+            gender: document.getElementById("genderInput").value,
+            email: document.getElementById("emailInput").value,
+            phoneNumber: document.getElementById("phoneNumberInput").value,
+            macAddress: document.getElementById("macAddressInput").value,
+            currentPassword: document.getElementById("currentPassword").value,
+            newPassword: document.getElementById("newPassword").value,
+            confirmPassword: document.getElementById("confirmPassword").value           
+        };
+
+        fetch("/attendanceRecordingQR/update_user_profile/", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(userData)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert("Profile updated successfully!");               
+                location.reload();  // Reload page to update profile data
+            } else {
+                alert("Update failed: " + data.message);
+            }
+        })
+        .catch(error => {
+        console.error("❌ Error updating profile:", error);
+        alert("❌ An error occurred. Please try again later.");
+    });
+    });
+
+    
+
+    // ✅ Function to show validation errors below the input fields
+    function showError(inputId, message) {
+    let inputField = document.getElementById(inputId);
+
+    // Remove any existing error messages to prevent duplicates
+    let existingError = inputField.parentNode.querySelector(".error-message");
+    if (existingError) {
+        existingError.remove();
+    }
+
+    // Create a new error message element
+    let errorMsg = document.createElement("div");
+    errorMsg.className = "error-message";
+    errorMsg.innerHTML = `<span>${message}</span>`;
+
+    // Place the error **after** the input field, ensuring it appears below
+    inputField.insertAdjacentElement("afterend", errorMsg);
+}
+
+
+
+//     document.getElementById("generateQRBtn").addEventListener("click", function() {
+//     fetch("/attendanceRecordingQR/get_server_ip/")
+//         .then(response => response.json())
+//         .then(data => {
+//             const serverIP = data.server_ip;
+//             const sessionId = Math.random().toString(36).substring(2, 10); // Generate unique session ID
+
+//             const qrCodeData = `http://${serverIP}:8000/attendanceRecordingQR/capture_mac_address/?session=${sessionId}`;
+//             document.getElementById("qrCodeContainer").style.display = "block";
+//             document.getElementById("qrcode").innerHTML = "";
+
+//             new QRCode(document.getElementById("qrcode"), {
+//                 text: qrCodeData,
+//                 width: 200,
+//                 height: 200
+//             });
+
+//             // 🔄 Poll every 3 seconds to check for MAC address
+//             let interval = setInterval(() => {
+//                 console.log("📡 Fetching MAC Address API...");
+//                 fetch(`/attendanceRecordingQR/capture_mac_address/?session=${sessionId}`)
+//                     .then(response => response.json())
+//                     .then(data => {
+//                         console.log("✅ API Response:", data);
+
+//                         // ✅ Ignore "Localhost - No MAC" and continue polling
+//                         if (data.macAddress === "Unknown" || data.macAddress === "Localhost - No MAC") {
+//                             console.warn("⚠️ Ignoring Localhost MAC Response - Still Polling...");
+//                             return; // Continue polling, do not stop
+//                         }
+
+//                         console.log("✅ Found MAC Address:", data.macAddress);
+
+//                         // ✅ Auto-fill the MAC address in the input field
+//                         let macInputField = document.getElementById("macAddressInput");
+//                         let macDisplayField = document.getElementById("macAddress");
+
+//                         if (macInputField && macDisplayField) {
+//                             macInputField.value = data.macAddress;
+//                             macDisplayField.innerText = data.macAddress;
+//                             console.log("✔️ MAC Address Auto-Filled in UI!");
+
+//                             // ✅ Stop polling once MAC is found
+//                             clearInterval(interval);
+
+//                             // 🔴 Hide QR Code after getting MAC
+//                             document.getElementById("qrCodeContainer").style.display = "none";
+//                         } else {
+//                             console.error("❌ MAC Address Input Field Not Found!");
+//                         }
+//                     })
+//                     .catch(error => {
+//                         console.error("❌ Error fetching MAC:", error);
+//                         clearInterval(interval); // 🛑 Stop polling if there's an error
+//                     });
+//             }, 3000); // Check every 3 seconds
+//         })
+//         .catch(error => alert("❌ Failed to fetch server IP!"));
+// });
+
+
+
+document.addEventListener("DOMContentLoaded", function() {
+    // If you have code for fill fields from user profile, keep that here
+
+    document.getElementById("generateQRBtn").addEventListener("click", function() {
+        fetch("/attendanceRecordingQR/get_server_ip/")
+            .then(response => response.json())
+            .then(data => {
+                const serverIP = data.server_ip;
+                const sessionId = Math.random().toString(36).substring(2, 10); // Generate unique session ID
+
+                const qrCodeData = `http://${serverIP}:8000/attendanceRecordingQR/capture_mac_address/?session=${sessionId}`;
+                document.getElementById("qrCodeContainer").style.display = "block";
+                document.getElementById("qrcode").innerHTML = "";
+
+                new QRCode(document.getElementById("qrcode"), {
+                    text: qrCodeData,
+                    width: 200,
+                    height: 200
+                });
+
+                // WAIT 10 seconds, then call checkMac
+                setTimeout(() => {
+                    checkMac(sessionId);
+                }, 10000);
+            })
+            .catch(error => alert("❌ Failed to fetch server IP!"));
+    });
+
+    // Define checkMac function
+    function checkMac(sessionId) {        
+        console.log("📡 Checking if MAC is stored for session:", sessionId);
+
+        fetch(`/attendanceRecordingQR/retrieve_mac_address/?session=${sessionId}`, { cache: "no-store" })
+            .then(response => response.json())
+            .then(data => {
+                console.log("✅ retrieve_mac_address Response:", data);
+
+                if (data.error) {
+                alert("❌ " + data.error);
+                return;
+                }   
+
+                if (!data.macAddress || data.macAddress === "MAC Not Found") {
+                    console.warn("⚠️ MAC not found yet or session mismatch.");
+                    return; // You could re-try or keep the QR code up
+                }            
+
+                // If we do have a real MAC:
+                console.log("✔️ MAC Address Retrieved:", data.macAddress);
+                
+                // Fill into your page fields
+                document.getElementById("macAddressInput").value = data.macAddress;
+                document.getElementById("macAddress").innerText = data.macAddress;
+
+                // Optional: Hide QR code if you only needed it once
+                document.getElementById("qrCodeContainer").style.display = "none";
+            })
+            .catch(err => console.error("❌ Error calling retrieve_mac_address:", err));
+    }
+});
+
+    </script>
+</body>
+</html>

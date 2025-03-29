@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {% load static %}
+    <link rel="stylesheet" type="text/css" href="{% static '/style.css' %}">
+    <title>Verify OTP - SAMS</title>
+    <style>
+        .page-wrapper {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+
+        .container {
+            display: flex;
+            flex-grow: 1;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .otp-form {
+            width: 100%;
+            max-width: 400px;
+            background-color: white;
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .otp-form h2 {
+            color: #012970;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .otp-input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 16px;
+            text-align: center;
+        }
+
+        .verify-btn {
+            width: 100%;
+            padding: 12px;
+            background-color: #1877f2;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 15px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .verify-btn:hover {
+            background-color: #166fe5;
+        }
+
+        #message {
+            margin-top: 15px;
+            font-size: 14px;
+        }
+
+        .success-message {
+            color: green;
+        }
+
+        .error-message {
+            color: red;
+        }
+
+        @media (max-width: 768px) {
+            .otp-form {
+                width: 90%;
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="page-wrapper">
+        <nav class="navbar">
+            <div class="navbar-brand">SAMS</div>
+        </nav>
+        <div class="container">
+            <div class="otp-form">
+                <h2>Verify OTP</h2>
+                <div class="form-group">
+                    <input type="text" id="otp" class="otp-input" placeholder="Enter 6-digit OTP" maxlength="6" required>
+                </div>
+                <button class="verify-btn" onclick="verifyOTP()">Verify</button>
+                <p id="message"></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function verifyOTP() {
+         let otp = document.getElementById("otp").value;
+         let userIdOrEmail = sessionStorage.getItem("userIdOrEmail"); // ✅ Retrieve stored userId from login
+
+        if (!userIdOrEmail) {
+            alert("User ID/E-mail is missing! Please login again.");
+            window.location.href = "/attendanceRecordingQR/"; // Redirect to login if userId is missing
+            return;
+        }
+
+        console.log("🔍 Sending userID:", userIdOrEmail);  // ✅ Debugging
+        console.log("🔍 Sending OTP:", otp);  // ✅ Debugging
+
+        fetch("/attendanceRecordingQR/verify_otp/", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ userIdOrEmail: userIdOrEmail, otp: otp }) // ✅ Send correct userId
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log("🔍 Server Response:", data);  // ✅ Debugging
+            if (data.success) {
+                alert("OTP Verified! Redirecting...");
+                window.location.href = data.redirectUrl;  // ✅ Redirect after successful verification
+            } else {
+                alert("Invalid OTP. Please try again.");
+            }
+        })
+        .catch(error => {
+            console.error("Error:", error);
+            alert("An error occurred. Please try again.");
+        });
+    }
+    </script>
+</body>
+</html>

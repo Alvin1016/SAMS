@@ -1,0 +1,455 @@
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SAMS - Dashboard</title>
+    {% load static %}
+    <link rel="stylesheet" type="text/css" href="{% static '/style.css' %}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        .stats-container {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .stat-card {
+            flex: 1;
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .stat-card h3 {
+            color: #012970;
+            margin-bottom: 10px;
+        }
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #1877f2;
+        }
+        .stat-trend {
+            color: green;
+            font-size: 14px;
+        }
+
+        .report-container {
+            display: flex;
+            gap: 20px; 
+            align-items: flex-start;
+        }
+        .reports-chart {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            flex: 1;
+            min-width: 45%;
+        }
+        .chart-title {
+            color: #012970;
+            margin-bottom: 20px;
+        }
+        .bottom-section {
+            display: flex;
+            gap: 20px;
+            flex: 1;
+            min-width: 45%;
+        }
+        .radar-chart {
+            flex: 1;
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .radar-chart h3 {
+            color: #012970;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="navbar-brand">
+            <a href="{% url 'studentDashboard' %}">SAMS</a>
+        </div>
+        <a href="{% url 'studentProfile' %}" class="header-profile">
+            <div class="profile-img" id="profileImg"></div>
+            <span>{{ request.session.user_name }}</span>
+        </a>
+    </nav>
+    <div class="dashboard-container">
+        <div class="sidebar">            
+            <ul class="sidebar-menu">
+                <li><a href="{% url 'studentDashboard' %}"><i class="fas fa-chart-line"></i> Dashboard</a></li>                
+                <li><a href="{% url 'logout' %}"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+            </ul>
+        </div>
+        <div class="main-content">
+            <div class="header">
+                <div class="header-title">
+                    <h1 style="margin-bottom: 20px; color: #4154F1;">Dashboard</h1>
+                </div>               
+            </div>
+            
+            <div class="stats-container">
+                <div class="stat-card">
+                    <h3>
+                        <span style="color: #4154F1;">Present</span>
+                        <span style="color: #899BBD; font-size: small;"> | Today</span>
+                    </h3>
+                    <div class="stat-value">145</div>
+                    <div class="stat-trend">12% increase</div>
+                </div>
+                <div class="stat-card">
+                    <h3>
+                        <span style="color: #4154F1;">Absent</span>
+                        <span style="color: #899BBD; font-size: small;"> | Today</span>
+                    </h3>
+                    <div class="stat-trend">12% increase</div>
+                </div>
+                <div class="stat-card">
+                    <h3>
+                        <span style="color: #4154F1;">Attendance</span>
+                        <span style="color: #899BBD; font-size: small;"> | This Month</span>
+                    </h3>
+                    <div class="stat-value">145</div>
+                    <div class="stat-trend">12% increase</div>
+                </div>
+                <div class="stat-card">
+                    <h3>
+                        <span style="color: #4154F1;">Attendance Report</span>
+                        <span style="color: #899BBD; font-size: small;"> | This Month</span>
+                    </h3>
+                    <div class="stat-value">145</div>
+                    <div class="stat-trend">12% increase</div>
+                </div>
+            </div>
+            <div class="report-container">
+                <div class="reports-chart">
+                    <h3 class="chart-title">
+                        <span style="color: #4154F1;">Reports</span>
+                        <span style="color: #899BBD; font-size: small;"> | This Month</span>
+                    </h3>
+                    <svg width="100%" height="300" viewBox="0 0 600 300">
+                        <path d="M0,150 Q150,50 300,100 T600,150" fill="none" stroke="#1877f2" stroke-width="2"/>
+                        <path d="M0,200 Q150,100 300,150 T600,200" fill="none" stroke="green" stroke-width="2"/>
+                        <path d="M0,250 Q150,150 300,200 T600,250" fill="none" stroke="orange" stroke-width="2"/>
+                    </svg>
+                </div>
+                
+                <div class="bottom-section">
+                    <div class="radar-chart">
+                        <h3>
+                        <span style="color: #4154F1;">Attendance Report</span>
+                        <span style="color: #899BBD; font-size: small;"> | This Month</span>
+                        </h3>
+
+                        <svg width="100%" height="300" viewBox="0 0 300 300">
+                            <polygon points="150,30 270,105 210,255 90,255 30,105" 
+                                    fill="none" stroke="#1877f2" stroke-width="2"/>
+                            <polygon points="150,60 240,135 180,255 60,255 120,135" 
+                                    fill="none" stroke="green" stroke-width="2"/>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+        let firstName = "{{ request.session.user_name }}";  // Get from session (or other source)
+        
+        if (firstName) {
+            let firstLetter = firstName.charAt(0).toUpperCase();  // Get first letter
+            document.getElementById("profileImg").innerText = firstLetter;  // Set as profile icon
+        }
+    });
+
+
+            function updateActiveMenu() {
+        const menuLinks = document.querySelectorAll('.sidebar-menu a');
+        const currentPath = window.location.pathname;
+
+        menuLinks.forEach(link => {
+            const linkPath = new URL(link.href, window.location.origin).pathname;  // Get absolute path
+
+            if (currentPath === linkPath || 
+                (linkPath === '/' && currentPath === '/studentDashboard')) {
+                menuLinks.forEach(l => l.classList.remove('active'));
+                link.classList.add('active');
+            }
+        });
+    }
+
+    // ✅ Run on page load
+    document.addEventListener('DOMContentLoaded', updateActiveMenu);
+
+    // ✅ Run on every navigation (for Single Page Applications)
+    window.addEventListener('popstate', updateActiveMenu);
+    </script>
+</body>
+</html> -->
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SAMS - Dashboard</title>
+    {% load static %}
+    <link rel="stylesheet" type="text/css" href="{% static '/style.css' %}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        .dashboard-container { 
+            display: flex; 
+        }
+
+        .sidebar { 
+            width: 200px; 
+        }
+
+        .main-content { 
+            flex-grow: 1; padding: 20px; 
+        }
+
+        .course-card { 
+            background-color: #fff; 
+            border-radius: 10px; 
+            padding: 15px; 
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1); 
+            margin-bottom: 15px; 
+        }
+
+        .course-header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+        }
+
+        .progress-circle {
+            width: 60px; 
+            height: 60px; 
+            border-radius: 50%; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            font-weight: bold; 
+            color: green; 
+            border: 4px solid #eee; 
+        }
+
+        .view-detail-btn { 
+            font-size: 15px;
+            margin-top: 10px; 
+            padding: 5px 10px; 
+            background-color: #1877f2; 
+            color: white; 
+            border-radius: 10px; 
+            cursor: pointer; 
+            border: none;          
+        }
+            
+
+        .attendance-detail { 
+            display: none; 
+            margin-top: 15px; 
+            padding-top: 10px; 
+            border-top: 1px solid #f0f0f0; 
+        }
+
+        .attendance-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            text-align: left;
+        }
+
+        .attendance-table th {
+            background-color: #1877f2;
+            color: white;
+            padding: 10px;
+            border-bottom: 2px solid #ddd;
+        }
+
+        .attendance-table td {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .attendance-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        .attendance-table tr:hover {
+            background-color: #f1f1f1;
+        }
+
+
+        /* Base styling for the circle */
+        .progress-circle {
+        /* We'll set these with inline styles if needed */
+        --percentage: 50;
+        --fill-color: #1877f2;
+
+        width: 80px;
+        height: 80px;
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        }
+
+        /* Draw the colored arc (background) */
+        .progress-circle::before {
+        content: "";
+        position: absolute;
+        inset: 0; /* top:0, right:0, bottom:0, left:0 */
+        border-radius: 50%;
+        /* Fill from 0% to (percentage)% with var(--fill-color), then #ddd for the rest */
+        background: conic-gradient(
+            var(--fill-color) calc(var(--percentage) * 1%), 
+            #ddd 0
+        );
+        }
+
+        /* Create a white hole in the center, so it looks like a ring */
+        .progress-circle::after {
+        content: "";
+        position: absolute;
+        top: 6px; /* thickness of ring */
+        left: 6px;
+        right: 6px;
+        bottom: 6px;
+        background: #fff;
+        border-radius: 50%;
+        z-index: 1; /* above ::before, below the text */
+        }
+
+        /* The text inside the ring */
+        .progress-circle span {
+        position: relative;
+        z-index: 2; /* above the white hole */
+        font-size: 14px;
+        color: #012970;
+        font-weight: bold;
+        }
+
+        /* Threshold-specific classes for fill color */
+        .progress-circle.low {
+        --fill-color: red;      /* < 50% */
+        }
+        .progress-circle.medium {
+        --fill-color: yellow;   /* 50–79% */
+        }
+        .progress-circle.high {
+        --fill-color: green;    /* 80%+ */
+        }
+
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="navbar-brand">
+            <a href="{% url 'studentDashboard' %}">SAMS</a>
+        </div>
+        <a href="{% url 'studentProfile' %}" class="header-profile">
+            <div class="profile-img" id="profileImg"></div>
+            <span>{{ request.session.user_name }}</span>
+        </a>
+    </nav>
+    <div class="dashboard-container">
+        <div class="sidebar">
+            <ul class="sidebar-menu">
+                <li><a href="{% url 'studentDashboard' %}"><i class="fas fa-chart-line"></i> Dashboard</a></li>
+                <li><a href="{% url 'logout' %}"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+            </ul>
+        </div>
+        <div class="main-content">
+            <h1 style="color: #4154F1;">Dashboard</h1>
+
+            {% for course in students %}
+            <div class="course-card">
+                <div class="course-header">
+                    <div>
+                        <h3>{{ course.courseName }}</h3>
+                        <span>({{ course.courseID }})</span>
+                    </div>
+
+                    <div class="progress-circle 
+                            {% if course.attendance < 50 %}
+                            low
+                            {% elif course.attendance < 80 %}
+                            medium
+                            {% else %}
+                            high
+                            {% endif %}"
+                    style="--percentage: {{ course.attendance }};">
+                    <span>{{ course.attendance }}%</span>
+                    </div>
+                    
+
+                </div>
+                <button class="view-detail-btn">View Details</button>
+                <div class="attendance-detail">
+                    <table class="attendance-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Class Type</th>
+                                <th>Status</th>
+                                <th>Time In</th>
+                                <th>Time Out</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for record in course.attendance_records %}
+                            <tr>
+                                <td>{{ record.date }}</td>
+                                <td>{{ record.classType }}</td>
+                                <td>{{ record.status }}</td>
+                                <td>{{ record.time_in|default:"-"  }}</td>
+                                <td>{{ record.time_out|default:"-" }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            document.querySelectorAll('.view-detail-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const detail = this.nextElementSibling;
+                    detail.style.display = detail.style.display === 'none' || detail.style.display === '' ? 'block' : 'none';
+                });
+            });
+
+            let firstName = "{{ request.session.user_name }}";
+            if (firstName) {
+                document.getElementById("profileImg").innerText = firstName.charAt(0).toUpperCase();
+            }
+
+            function updateActiveMenu() {
+                const menuLinks = document.querySelectorAll('.sidebar-menu a');
+                const currentPath = window.location.pathname;
+                menuLinks.forEach(link => {
+                    link.classList.toggle('active', link.getAttribute('href') === currentPath);
+                });
+            }
+
+            updateActiveMenu();
+            window.addEventListener('popstate', updateActiveMenu);
+        });
+    </script>
+</body>
+</html>

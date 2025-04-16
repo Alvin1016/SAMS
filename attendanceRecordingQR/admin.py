@@ -2,12 +2,29 @@ from django.contrib import admin
 from django.contrib.auth.hashers import make_password
 from django.shortcuts import render, redirect
 from django.http import HttpResponseRedirect
+from django.utils.html import format_html
 from django.contrib.admin.helpers import ACTION_CHECKBOX_NAME
 from .models import AttendanceRecordingTb, UserTb, CourseTb, EnrollmentTb, ActiveQRCode
 
 class AttendanceAdmin(admin.ModelAdmin):
-    list_display = ('attdID', 'date', 'time_in', 'time_out', 'classType', 'status', 'userID', 'courseID')
-    search_fields = ('attdID', 'date', 'time_in', 'time_out', 'classType', 'status', 'userID', 'courseID')
+    list_display = ('attdID', 'date', 'time_in', 'time_out', 'classType', 'colored_status', 'userID', 'courseID')
+    search_fields = ('attdID', 'date', 'time_in', 'time_out', 'classType', 'colored_status', 'userID', 'courseID')
+
+    def colored_status(self, obj):
+            color = {
+                'Present': 'green',
+                'Absent': 'red',
+                'Pending': 'orange'
+            }.get(obj.status, 'black')  # Default color = black
+
+            return format_html(
+                '<span style="padding: 4px 10px; border-radius: 8px; background-color:{}; color:white; font-weight:bold;">{}</span>',
+                color, obj.status
+            )
+    
+    colored_status.short_description = 'Status'
+
+
 admin.site.register(AttendanceRecordingTb, AttendanceAdmin)
 
 class AttendanceAdmin1(admin.ModelAdmin):

@@ -210,13 +210,13 @@
                     data.report.forEach(student => {
                         let rowColor = student.attendance < 80 ? " style='color: red;'" : "";
                         reportHTML += `
-                            <tr${rowColor}>
+                            <tr>
                                 <td>${student.id}</td>
                                 <td>${student.name}</td>
                                 <td>${student.present}</td>
                                 <td>${student.total_classes}</td>
-                                <td>${student.attendance}%</td>
-                                <td>${student.status}</td>
+                                <td${rowColor}>${student.attendance}%</td>
+                                <td${rowColor}>${student.status}</td>
                             </tr>
                         `;
                     });
@@ -259,7 +259,8 @@
                 doc.text(`SAMS - Attendance Report for ${selectedCourseName} - (${month} ${year})`, 10, 10);
 
                 let rows = [];
-                data.report.forEach(student => {
+                data.report.forEach(student => {                    
+
                     rows.push([
                         student.id,
                         student.name,

@@ -610,7 +610,7 @@ def verify_attendance(request):
                 duration = (time_out - time_in).total_seconds() / 60.0
 
                 # ✅ Mark Absent if less than 2 minutes
-                existing_attendance.status = "Absent" if duration < 2 else "Present"
+                existing_attendance.status = "Absent" if duration < 0.1 else "Present"
                 existing_attendance.save()
 
                 # ✅ Redirect success

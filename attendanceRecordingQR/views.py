@@ -401,44 +401,53 @@ def verify_attendance(request):
         ).first()
 
         if existing_attendance:
-            # 5️⃣ If time_out is empty, update it for THIS student
-            if existing_attendance.time_out is None:
-                existing_attendance.time_out = datetime.now().time()
-                existing_attendance.save()
-
-                # ✅ Calculate duration
-                time_in = datetime.combine(datetime.today(), existing_attendance.time_in)
-                time_out = datetime.combine(datetime.today(), existing_attendance.time_out)
-                duration = (time_out - time_in).total_seconds() / 60.0
-
-                # ✅ Mark Absent if less than 2 minutes
-                existing_attendance.status = "Absent" if duration < 0.1 else "Present"
-                existing_attendance.save()
-
-                # ✅ Redirect success
+            if existing_attendance.time_in is None:
                 params = {
                     'subjectID': course.courseID,
                     'subjectName': course.courseName,
                     'section': class_type,
                     'date': date,
-                    'timeIn': existing_attendance.time_in.strftime("%I:%M %p"),
-                    'timeOut': existing_attendance.time_out.strftime("%I:%M %p"),
-                    'studentID': student.userID  # ✅ Add Student ID in response
+                    'error': "❌ Attendance already completed for this session.",
+                    'studentID': student.userID
                 }
-                return redirect(f"/attendanceRecordingQR/success/?{urlencode(params)}")
+                return redirect(f"/attendanceRecordingQR/unsuccess/?{urlencode(params)}")
 
-            else:
-                # ✅ If already marked, just return success page
+            if existing_attendance.time_out:
                 params = {
                     'subjectID': course.courseID,
                     'subjectName': course.courseName,
                     'section': class_type,
                     'date': date,
-                    'timeIn': existing_attendance.time_in.strftime("%I:%M %p"),
-                    'timeOut': existing_attendance.time_out.strftime("%I:%M %p"),
-                    'studentID': student.userID  # ✅ Add Student ID in response
+                    'error': "❌ Attendance already completed for this session.",
+                    'studentID': student.userID
                 }
-                return redirect(f"/attendanceRecordingQR/success/?{urlencode(params)}")
+                return redirect(f"/attendanceRecordingQR/unsuccess/?{urlencode(params)}")
+
+
+            existing_attendance.time_out = datetime.now().time()
+            existing_attendance.save()
+
+            # ✅ Calculate duration
+            time_in = datetime.combine(datetime.today(), existing_attendance.time_in)
+            time_out = datetime.combine(datetime.today(), existing_attendance.time_out)
+            duration = (time_out - time_in).total_seconds() / 60.0
+
+            # ✅ Mark Absent if less than 2 minutes
+            existing_attendance.status = "Absent" if duration < 2 else "Present"
+            existing_attendance.save()
+
+            # ✅ Redirect success
+            params = {
+                'subjectID': course.courseID,
+                'subjectName': course.courseName,
+                'section': class_type,
+                'date': date,
+                'timeIn': existing_attendance.time_in.strftime("%I:%M %p"),
+                'timeOut': existing_attendance.time_out.strftime("%I:%M %p"),
+                'studentID': student.userID  # ✅ Add Student ID in response
+            }
+            return redirect(f"/attendanceRecordingQR/success/?{urlencode(params)}")
+            
 
         # 6️⃣ If no existing record for THIS student, create a new one
         new_record = AttendanceRecordingTb.objects.create(

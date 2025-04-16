@@ -105,10 +105,10 @@
         .error-message {
             color: red;
             font-size: 12px;
-            margin-top: 5px;  /* Ensures space below the input */
+            margin-top: 5px;  
             display: flex;
             align-items: center;
-            gap: 5px; /* Adds space between the icon and text */
+            gap: 5px; 
         }
 
         .error-message span {
@@ -422,81 +422,15 @@
         existingError.remove();
     }
 
-    // Create a new error message element
     let errorMsg = document.createElement("div");
     errorMsg.className = "error-message";
     errorMsg.innerHTML = `<span>${message}</span>`;
 
-    // Place the error **after** the input field, ensuring it appears below
     inputField.insertAdjacentElement("afterend", errorMsg);
 }
 
 
-
-//     document.getElementById("generateQRBtn").addEventListener("click", function() {
-//     fetch("/attendanceRecordingQR/get_server_ip/")
-//         .then(response => response.json())
-//         .then(data => {
-//             const serverIP = data.server_ip;
-//             const sessionId = Math.random().toString(36).substring(2, 10); // Generate unique session ID
-
-//             const qrCodeData = `http://${serverIP}:8000/attendanceRecordingQR/capture_mac_address/?session=${sessionId}`;
-//             document.getElementById("qrCodeContainer").style.display = "block";
-//             document.getElementById("qrcode").innerHTML = "";
-
-//             new QRCode(document.getElementById("qrcode"), {
-//                 text: qrCodeData,
-//                 width: 200,
-//                 height: 200
-//             });
-
-//             // 🔄 Poll every 3 seconds to check for MAC address
-//             let interval = setInterval(() => {
-//                 console.log("📡 Fetching MAC Address API...");
-//                 fetch(`/attendanceRecordingQR/capture_mac_address/?session=${sessionId}`)
-//                     .then(response => response.json())
-//                     .then(data => {
-//                         console.log("✅ API Response:", data);
-
-//                         // ✅ Ignore "Localhost - No MAC" and continue polling
-//                         if (data.macAddress === "Unknown" || data.macAddress === "Localhost - No MAC") {
-//                             console.warn("⚠️ Ignoring Localhost MAC Response - Still Polling...");
-//                             return; // Continue polling, do not stop
-//                         }
-
-//                         console.log("✅ Found MAC Address:", data.macAddress);
-
-//                         // ✅ Auto-fill the MAC address in the input field
-//                         let macInputField = document.getElementById("macAddressInput");
-//                         let macDisplayField = document.getElementById("macAddress");
-
-//                         if (macInputField && macDisplayField) {
-//                             macInputField.value = data.macAddress;
-//                             macDisplayField.innerText = data.macAddress;
-//                             console.log("✔️ MAC Address Auto-Filled in UI!");
-
-//                             // ✅ Stop polling once MAC is found
-//                             clearInterval(interval);
-
-//                             // 🔴 Hide QR Code after getting MAC
-//                             document.getElementById("qrCodeContainer").style.display = "none";
-//                         } else {
-//                             console.error("❌ MAC Address Input Field Not Found!");
-//                         }
-//                     })
-//                     .catch(error => {
-//                         console.error("❌ Error fetching MAC:", error);
-//                         clearInterval(interval); // 🛑 Stop polling if there's an error
-//                     });
-//             }, 3000); // Check every 3 seconds
-//         })
-//         .catch(error => alert("❌ Failed to fetch server IP!"));
-// });
-
-
-
 document.addEventListener("DOMContentLoaded", function() {
-    // If you have code for fill fields from user profile, keep that here
 
     document.getElementById("generateQRBtn").addEventListener("click", function() {
         fetch("/attendanceRecordingQR/get_server_ip/")
@@ -515,7 +449,6 @@ document.addEventListener("DOMContentLoaded", function() {
                     height: 200
                 });
 
-                // WAIT 10 seconds, then call checkMac
                 setTimeout(() => {
                     checkMac(sessionId);
                 }, 10000);
@@ -523,7 +456,7 @@ document.addEventListener("DOMContentLoaded", function() {
             .catch(error => alert("❌ Failed to fetch server IP!"));
     });
 
-    // Define checkMac function
+
     function checkMac(sessionId) {
         console.log("📡 Checking if MAC is stored for session:", sessionId);
 
@@ -539,13 +472,11 @@ document.addEventListener("DOMContentLoaded", function() {
 
                 if (!data.macAddress || data.macAddress === "MAC Not Found") {
                     console.warn("⚠️ MAC not found yet or session mismatch.");
-                    return; // You could re-try or keep the QR code up
+                    return;
                 }            
 
-                // If we do have a real MAC:
                 console.log("✔️ MAC Address Retrieved:", data.macAddress);
                 
-                // Fill into your page fields
                 document.getElementById("macAddressInput").value = data.macAddress;
                 document.getElementById("macAddress").innerText = data.macAddress;
 

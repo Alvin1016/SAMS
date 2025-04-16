@@ -95,7 +95,6 @@
 
         /* Base styling for the circle */
         .progress-circle {
-        /* We'll set these with inline styles if needed */
         --percentage: 50;
         --fill-color: #1877f2;
 
@@ -111,9 +110,8 @@
         .progress-circle::before {
         content: "";
         position: absolute;
-        inset: 0; /* top:0, right:0, bottom:0, left:0 */
+        inset: 0; 
         border-radius: 50%;
-        /* Fill from 0% to (percentage)% with var(--fill-color), then #ddd for the rest */
         background: conic-gradient(
             var(--fill-color) calc(var(--percentage) * 1%), 
             #ddd 0
@@ -124,19 +122,19 @@
         .progress-circle::after {
         content: "";
         position: absolute;
-        top: 6px; /* thickness of ring */
+        top: 6px; 
         left: 6px;
         right: 6px;
         bottom: 6px;
         background: #fff;
         border-radius: 50%;
-        z-index: 1; /* above ::before, below the text */
+        z-index: 1; 
         }
 
         /* The text inside the ring */
         .progress-circle span {
         position: relative;
-        z-index: 2; /* above the white hole */
+        z-index: 2; 
         font-size: 14px;
         color: #012970;
         font-weight: bold;

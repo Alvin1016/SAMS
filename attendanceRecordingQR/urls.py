@@ -1,4 +1,4 @@
-from django.urls import path, include
+from django.urls import path
 from django.contrib.auth import views as auth_views
 from . import views
 
@@ -34,8 +34,6 @@ urlpatterns = [
     path("capture_mac_address/", views.capture_mac_address, name="capture_mac_address"),
     path('retrieve_mac_address/', views.retrieve_mac_address, name='retrieve_mac_address'),
     path('reset_password_request_otp/', views.reset_password_request_otp, name='reset_password_request_otp'),
-    path('reset_password_verify_otp/', views.reset_password_verify_otp, name='reset_password_verify_otp'),
-
-    
+    path('reset_password_verify_otp/', views.reset_password_verify_otp, name='reset_password_verify_otp'),    
 ]
 

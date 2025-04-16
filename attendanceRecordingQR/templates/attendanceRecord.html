@@ -28,14 +28,14 @@
         }
 
         .filter-group input[type="date"] {
-        padding: 8px; /* Same as dropdown */
-        border: 1px solid #ddd; /* Same as dropdown */
-        border-radius: 5px; /* Rounded corners */
-        font-size: 14px; /* Match text size */
-        background-color: white; /* Same as dropdown */
-        color: #012970; /* Text color */
+        padding: 8px; 
+        border: 1px solid #ddd; 
+        border-radius: 5px; 
+        font-size: 14px; 
+        background-color: white; 
+        color: #012970; 
         cursor: pointer;
-        width: 100%; /* Ensure width matches dropdown */
+        width: 100%;
     }
         
         .filter-group label {
@@ -186,27 +186,7 @@
                             <th>Student ID</th>
                             <th>Status</th>
                         </tr>
-                    </thead>
-                    <!-- <tbody>
-                        <tr>
-                            <td><input type="checkbox" class="student-checkbox"></td>
-                            <td>John Doe</td>
-                            <td>#2123123</td>
-                            <td><span class="status-badge status-present">Present</span></td>
-                        </tr>
-                        <tr>
-                            <td><input type="checkbox" class="student-checkbox"></td>
-                            <td>Jane Smith</td>
-                            <td>#2123124</td>
-                            <td><span class="status-badge status-present">Present</span></td>
-                        </tr>
-                        <tr>
-                            <td><input type="checkbox" class="student-checkbox"></td>
-                            <td>Mike Johnson</td>
-                            <td>#2123125</td>
-                            <td><span class="status-badge status-present">Present</span></td>
-                        </tr>
-                    </tbody> -->
+                    </thead>                    
                     <tbody id="student-table-body"></tbody>
                 </table>
             </div>
@@ -237,11 +217,11 @@
 
 
             function updateActiveMenu() {
-        const menuLinks = document.querySelectorAll('.sidebar-menu a');
-        const currentPath = window.location.pathname;
+            const menuLinks = document.querySelectorAll('.sidebar-menu a');
+            const currentPath = window.location.pathname;
 
         menuLinks.forEach(link => {
-            const linkPath = new URL(link.href, window.location.origin).pathname;  // Get absolute path
+            const linkPath = new URL(link.href, window.location.origin).pathname;
 
             if (currentPath === linkPath || 
                 (linkPath === '/' && currentPath === '/attendanceTracking')) {
@@ -269,60 +249,6 @@
         console.log("📅 Selected Date:", dateInput.value);
     });
 });
-
-
-    //     document.addEventListener('DOMContentLoaded', function () {
-    //     const subjectSelect = document.getElementById('subject');
-    //     const studentTableBody = document.getElementById('student-table-body');
-
-    //     subjectSelect.addEventListener('change', function () {
-    //         const courseID = subjectSelect.value;
-
-    //         fetch(`/attendanceRecordingQR/get_students/?course_id=${courseID}`)
-    //             .then(response => {
-    //                 if (!response.ok) {
-    //                     throw new Error('Network response was not ok');
-    //                 }
-    //                 return response.json();
-    //             })
-    //             .then(data => {
-    //                 // Clear previous students
-    //                 studentTableBody.innerHTML = '';
-
-    //                 // Check if students exist
-    //                 if (data.students && data.students.length > 0) {
-    //                     data.students.forEach(student => {
-    //                         const row = `                                
-    //                             <tr data-mac="${student.macAddress}">                                
-    //                                 <td><input type="checkbox" class="student-checkbox" data-student-id="${student.id}"></td>
-    //                                 <td>${student.name}</td>
-    //                                 <td>${student.id}</td>
-    //                                 <td><span class="status-badge status-absent">Absent</span></td>
-    //                             </tr>
-    //                         `;
-    //                         studentTableBody.innerHTML += row;
-    //                     });
-    //                 } else {
-    //                     studentTableBody.innerHTML = `
-    //                         <tr>
-    //                             <td colspan="4" class="text-center">
-    //                                 No students found for this course.
-    //                             </td>
-    //                         </tr>
-    //                     `;
-    //                 }
-    //             })
-    //             .catch(error => {
-    //                 studentTableBody.innerHTML = `
-    //                     <tr>
-    //                         <td colspan="4" class="text-center text-danger">
-    //                             Failed to load students. Please try again.
-    //                         </td>
-    //                     </tr>
-    //                 `;
-    //             });
-    //     });
-    // });
 
 
     document.addEventListener('DOMContentLoaded', function () {
@@ -489,134 +415,6 @@ document.getElementById('student-table-body').addEventListener('change', functio
 });
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    // document.addEventListener('DOMContentLoaded', function () {
-    // let sessionId = sessionStorage.getItem('sessionId');
-    // if (!sessionId) {
-    //     sessionId = Math.random().toString(36).substring(2, 10);
-    //     sessionStorage.setItem('sessionId', sessionId);
-    // }
-
-
-    // fetch("/attendanceRecordingQR/get_server_ip/") // Fetch the server IP dynamically from Django
-    //     .then(response => {
-    //         if (!response.ok) {
-    //             throw new Error("⚠️ Failed to fetch server IP");
-    //         }
-    //         return response.json();
-    //     })
-    //     .then(data => {
-    //         const serverIP = data.server_ip; // Get IP from Django backend
-    //         console.log("✅ Server IP:", serverIP);
-
-    //         // Get required elements
-    //         const subjectSelect = document.getElementById('subject');
-    //         const sectionSelect = document.getElementById('section');
-    //         const dateSelect = document.getElementById('date');
-    //         const generateQrBtn = document.getElementById('generate-qr-btn');
-    //         const qrCodeImage = document.getElementById('qr-code-image');
-
-    //         generateQrBtn.addEventListener('click', function () {
-    //             const subject = subjectSelect.value;
-    //             const section = sectionSelect.value;
-    //             const date = dateSelect.value;
-
-    //             if (!subject || !section || !date) {
-    //                 alert("⚠️ Please select a subject, section, and date before generating the QR Code!");
-    //                 return;
-    //             }
-
-    //             // ✅ Generate the attendance verification URL
-    //             const qrDataUrl = `http://${serverIP}:8000/attendanceRecordingQR/verify_attendance/?subject=${encodeURIComponent(subject)}&section=${encodeURIComponent(section)}&date=${encodeURIComponent(date)}&session=${sessionId}`;
-
-    //             console.log("✅ QR Code URL:", qrDataUrl);
-
-    //             // ✅ Generate the QR Code inside the <img> tag
-    //             qrCodeImage.style.display = "block";
-    //             qrCodeImage.src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(qrDataUrl)}`;
-
-    //             console.log("✅ QR Code Generated!");
-    //         });
-    //     })
-    //     .catch(error => console.error("⚠️ Error Fetching Server IP:", error));
-
-    // ✅ Function to check attendance after scanning the QR code
-//     function checkAttendance(sessionId) {
-//     console.log("📡 Checking attendance for session:", sessionId);
-
-//     fetch(`/attendanceRecordingQR/attendance_capture_mac_address/?session=${sessionId}`, { cache: "no-store" })
-//         .then(response => response.json())
-//         .then(data => {
-//             console.log("✅ Retrieved MAC:", data);
-
-//             if (!data.macAddress || data.macAddress === "MAC Not Found") {
-//                 console.warn("⚠️ MAC not found yet or session mismatch.");
-//                 return;
-//             }
-
-//             // ✅ Find student row
-//             console.log("🔍 Searching for row with MAC:", data.macAddress);
-//             const studentRow = document.querySelector(`tr[data-mac="${data.macAddress}"]`);
-//             console.log("📌 Found row:", studentRow);
-
-//             if (!studentRow) {
-//                 console.warn("❌ No row found for MAC:", data.macAddress);
-//                 return;
-//             }
-
-//             // ✅ Get Subject & Date from filters
-//             const subject = document.getElementById("subject").value;
-//             const date = document.getElementById("date").value;
-
-//             // ✅ Send attendance to the server (Fixed: Now sending full JSON data)
-//             fetch(`/attendanceRecordingQR/verify_attendance/`, {
-//                 method: "POST",
-//                 headers: { "Content-Type": "application/json" },
-//                 body: JSON.stringify({
-//                     session: sessionId,
-//                     subject: subject,
-//                     date: date
-//                 })
-//             })
-//             .then(response => response.json())
-//             .then(result => {
-//                 if (result.success) {
-//                     alert("✅ Attendance recorded successfully!");
-
-//                     // ✅ Update UI after receiving successful response
-//                     const checkbox = studentRow.querySelector(".student-checkbox");
-//                     const statusBadge = studentRow.querySelector(".status-badge");
-
-//                     if (checkbox && statusBadge) {
-//                         console.log("🔄 Updating UI for MAC:", data.macAddress);
-//                         checkbox.checked = true;
-//                         statusBadge.textContent = "Present";
-//                         statusBadge.className = "status-badge status-present";
-//                     }
-//                 } else {
-//                     alert("⚠️ " + result.message);
-//                 }
-//             })
-//             .catch(err => console.error("❌ Error updating attendance:", err));
-//         })
-//         .catch(err => console.error("❌ Error retrieving MAC:", err));
-// }
-
-
-
 document.addEventListener("DOMContentLoaded", function () {
     const subjectSelect = document.getElementById("subject");   
     const class_Type = document.getElementById("section");
@@ -726,11 +524,7 @@ function checkAttendance(sessionId) {
 
         })
         .catch(err => console.error("❌ Error retrieving attendance:", err));
-
-
 }
-    // });
-
 
     </script>
 </body>

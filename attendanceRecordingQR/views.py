@@ -1,25 +1,18 @@
-from django.shortcuts import render, redirect
-from django.http import HttpResponse
+from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse
-from django.shortcuts import get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.hashers import make_password,check_password
-import json
-import re, subprocess, platform
-import socket
+import json, re, subprocess, platform, socket, random, pytz
 from datetime import datetime
 from django.core.cache import cache  
-import random
-from django.core.mail import send_mail
 from django.utils import timezone
 from django.utils.http import urlencode
 from django.views.decorators.cache import cache_control
 from django.utils.timezone import localtime,now
-import pytz
 from django.core.mail import EmailMultiAlternatives
 from django.utils.html import strip_tags
 from .models import AttendanceRecordingTb, UserTb, CourseTb, EnrollmentTb, ActiveQRCode
-MAC_STORE = {}  # Key: sessionId (str), Value: MAC (str)
+MAC_STORE = {} 
 
 
 def attendanceTracking(request):
@@ -233,52 +226,6 @@ def mannual_record_attendance(request):
     
 
 
-
-
-# def attendance_capture_mac_address(request):
-#     print("📢 capture_mac_address() is being called!")
-#     session_id = request.GET.get("session")
-#     if not session_id:
-#         return JsonResponse({"error": "Session ID required"}, status=400)    
-
-#     # 1️⃣ Already stored?
-#     if session_id in MAC_STORE:
-#         # If the MAC is already captured, return it immediately
-#         return JsonResponse({"macAddress": MAC_STORE[session_id]})
-
-#     client_ip = get_client_ip(request)
-#     print(f"📢 Checking Client IP: {client_ip}")
-
-#     if client_ip.startswith("127.") or client_ip == "0.0.0.0":
-#         return JsonResponse({"error": "Waiting for a real IP"}, status=202)
-
-#     print(f"✅ Real IP found: {client_ip}")
-#     mac_address = get_mac_from_ip(client_ip)
-#     print(f"🔎 Captured MAC: {mac_address}")
-
-#     # 2️⃣ Store in MAC_STORE
-#     if mac_address and mac_address == "Unknown":
-#         return JsonResponse({"macAddress": "MAC Not Found"})
-       
-    
-    
-#     MAC_STORE[session_id] = mac_address
-#     print(f"✅ MAC {mac_address} stored for session {session_id}")
-#     return JsonResponse({"Submitting MAC Address...": mac_address})
-        
-
-
-
-
-# def attendance_retrieve_mac_address(request):
-#     session_id = request.GET.get("session")
-#     if not session_id:
-#         return JsonResponse({"error": "Session ID required"}, status=400)
-            
-#     mac = MAC_STORE.get(session_id, "MAC Not Found")
-#     return JsonResponse({"macAddress": mac})  
-
-
 def attendance_capture_mac_address(request):
     print("📢 capture_mac_address() is being called!")
 
@@ -341,151 +288,6 @@ def generate_qr_code(request):
     })     
     
     
-    
-
-
-# before latest corrected code
-# def verify_attendance(request):
-#     subject = request.GET.get('subject')
-#     class_type = request.GET.get('classType')
-#     date = request.GET.get('date')
-#     session_id = request.GET.get('session')
-     
-#     if not session_id:
-#         return JsonResponse({"error": "Session ID missing"}, status=400)
-
-#     # 1) Run the capture function
-#     capture_response = attendance_capture_mac_address(request)
-#     print("Capture response:", capture_response.content.decode('utf-8'))
-    
-#     # 2) Retrieve the MAC address from the updated MAC_STORE
-#     response = attendance_retrieve_mac_address(request)
-#     data = json.loads(response.content.decode('utf-8'))
-#     user_mac_address = data.get("macAddress")
-#     print(f"Detected MAC Address: {user_mac_address}")
-
-#     try:
-#         # Make sure 'subject' is not None and is a valid course ID
-#         # if not subject:
-#         #     return JsonResponse({"error": "Subject parameter missing"}, status=400)
-
-#         student = UserTb.objects.get(macAddress=user_mac_address)
-#         course = CourseTb.objects.get(courseID=subject)  # If it doesn't exist, you'll hit the except below
-
-#         existing_attendance = AttendanceRecordingTb.objects.filter(
-#             date=date,
-#             userID=student,
-#             courseID=course,
-#             classType=class_type
-#         ).first()
-
-#         # If "Absent" is already recorded, block
-#         if existing_attendance and existing_attendance.status == "Absent":
-#             base_url = '/attendanceRecordingQR/unsuccess/'
-#             params = {
-#                 'subjectID': course.courseID,
-#                 'subjectName': course.courseName,
-#                 'section': class_type,
-#                 'date': date,
-#                 'error': "❌ Attendance Not Allowed After Being Marked Absent!"
-#             }
-#             url = f"{base_url}?{urlencode(params)}"
-#             return redirect(url)
-        
-#         # If there's an existing attendance record
-#         if existing_attendance:
-#             # If time_out not yet recorded, update it
-#             if existing_attendance.time_out is None:
-#                 existing_attendance.time_out = datetime.now().time()
-#                 existing_attendance.save()
-
-#                 # ✅ Calculate Duration in minutes
-#                 time_in = datetime.combine(datetime.today(), existing_attendance.time_in)
-#                 time_out = datetime.combine(datetime.today(), existing_attendance.time_out)
-#                 duration = (time_out - time_in).total_seconds() / 60.0
-
-#                 # ✅ Mark Absent if less than 30 minutes
-#                 if duration < 0.1:
-#                     existing_attendance.status = "Absent"
-#                 else:
-#                     existing_attendance.status = "Present"
-#                 existing_attendance.save()
-                
-#                 # Redirect with success
-#                 base_url = '/attendanceRecordingQR/success/'
-#                 params = {
-#                     'subjectID': course.courseID,
-#                     'subjectName': course.courseName,
-#                     'section': class_type,
-#                     'date': date,
-#                     'timeIn': existing_attendance.time_in.strftime("%I:%M %p"),
-#                     'timeOut': existing_attendance.time_out.strftime("%I:%M %p"),
-#                 }
-#                 url = f"{base_url}?{urlencode(params)}"
-#                 return redirect(url)
-#             else:
-#                # Redirect with success
-#                 base_url = '/attendanceRecordingQR/success/'
-#                 params = {
-#                     'subjectID': course.courseID,
-#                     'subjectName': course.courseName,
-#                     'section': class_type,
-#                     'date': date,
-#                     'timeIn': existing_attendance.time_in.strftime("%I:%M %p"),
-#                     'timeOut': existing_attendance.time_out.strftime("%I:%M %p"),
-#                 }
-#                 url = f"{base_url}?{urlencode(params)}"
-#                 return redirect(url) 
-
-#         else:
-#             # ✅ Record new attendance
-#             new_record = AttendanceRecordingTb.objects.create(
-#                 date=date,
-#                 time_in=datetime.now().time(),
-#                 time_out=None,
-#                 classType=class_type,
-#                 status="Pending",
-#                 userID=student,
-#                 courseID=course,
-#             )
-            
-#             # Redirect with success
-#             base_url = '/attendanceRecordingQR/success/'
-#             params = {
-#                 'subjectID': course.courseID,
-#                 'subjectName': course.courseName,
-#                 'section': class_type,
-#                 'date': date,
-#                 'timeIn': new_record.time_in.strftime("%I:%M %p"),
-#             }
-#             url = f"{base_url}?{urlencode(params)}"
-#             return redirect(url)
-
-#     except UserTb.DoesNotExist:
-#         base_url = '/attendanceRecordingQR/unsuccess/'
-#         params = {
-#                 'subjectID':"Unknown",
-#                 'subjectName': "Unknown",
-#                 'section': "Unknown",
-#                 'date': "Unknown",
-#                 'error': "❌ Device Not Registered. Attendance Failed!"
-#             }
-#         url = f"{base_url}?{urlencode(params)}"
-#         return redirect(url)
-    
-#     except CourseTb.DoesNotExist:
-#         base_url = '/attendanceRecordingQR/unsuccess/'
-#         params = {
-#                 'subjectID': "Unknown",
-#                 'subjectName': "Unknown",
-#                 'section': "Unknown",
-#                 'date': "Unknown",
-#                 'error': "❌ Course Not Found. Attendance Failed!"
-#             }
-#         url = f"{base_url}?{urlencode(params)}"
-#         return redirect(url)
-
-
 
 def verify_attendance(request):
     subject = request.GET.get('subject')
@@ -729,16 +531,6 @@ def user_login(request):
                 print(f"✅ Storing OTP: {otp} in key: {otp_key}")
 
                 cache.set(otp_key, otp, timeout=600)  # ✅ Store OTP for 10 minutes
-
-                # # ✅ Send OTP via Email
-                # send_mail(
-                #     subject="Your OTP for Login",
-                #     message=f"Hello {user.fName},\n\nYour OTP for login is: {otp}.\n\nDo not share this with anyone.",
-                #     from_email="alvin10381@gmail.com",
-                #     recipient_list=[user.email],
-                #     fail_silently=False,
-                # )
-
 
                 # ✅ Send HTML styled OTP Email
                 subject = "🔐 Your OTP for Login - SAMS"
@@ -1099,59 +891,6 @@ def generate_monthly_report(request, course_id, month, year):
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-##########################################################################################################
-
-
-
-# # Store session-wise MAC addresses in memory (temporary storage)
-# mac_storage = {}
-
-# @csrf_exempt
-# def submit_mac_address(request):
-#     """
-#     This view receives MAC addresses from mobile devices and stores them temporarily.
-#     """
-#     if request.method == "POST":
-#         try:
-#             data = json.loads(request.body)
-#             session_id = data.get("session")
-#             mac_address = data.get("macAddress")
-
-#             if session_id and mac_address:
-#                 mac_storage[session_id] = mac_address
-#                 return JsonResponse({"success": True})
-#             else:
-#                 return JsonResponse({"success": False, "message": "Invalid data"}, status=400)
-#         except json.JSONDecodeError:
-#             return JsonResponse({"success": False, "message": "Invalid JSON"}, status=400)
-
-#     return JsonResponse({"success": False, "message": "Invalid request"}, status=405)
-
-
-# def get_mac_address(request, session_id):
-#     """API for PC to fetch the MAC address from the phone via session ID."""
-#     mac_address = mac_storage.get(session_id)
-#     if mac_address:
-#         return JsonResponse({"macAddress": mac_address})
-#     return JsonResponse({"macAddress": None})  # No MAC address yet
-##########################################################################################################
-
-# def capture_mac_address_page(request):
-#     return render(request, "captureMacAddress.html")
-
-# Function to get MAC address using ARP 
-
 # ✅ Function to Get MAC Address from IP
 def get_mac_from_ip(ip):
     try:
@@ -1214,7 +953,6 @@ def get_client_ip(request):
 
 
 
-
 def capture_mac_address(request):
     print("📢 capture_mac_address() is being called!")
     session_id = request.GET.get("session")
@@ -1252,8 +990,6 @@ def capture_mac_address(request):
         
 
 
-
-
 def retrieve_mac_address(request):
     session_id = request.GET.get("session")
     if not session_id:
@@ -1265,10 +1001,6 @@ def retrieve_mac_address(request):
 
 
 def reset_password_request_otp(request):
-    """
-    1) GET -> Render a page where user enters their userID or email.
-    2) POST -> Generate OTP, store it in session, email it to the user.
-    """
     if request.method == 'GET':
         return render(request, 'reset_password_request_otp.html')
 
@@ -1292,9 +1024,7 @@ def reset_password_request_otp(request):
 
         # Generate a 6-digit numeric OTP
         otp_code = str(random.randint(100000, 999999))
-
-        # Store OTP in the user's session (NOT in the database)
-        # Also store the identifier so we know which user is resetting the password
+        
         request.session['reset_otp'] = otp_code
         request.session['reset_identifier'] = identifier
         # Optionally store a timestamp for expiration checks
@@ -1350,10 +1080,6 @@ def reset_password_request_otp(request):
 
 
 def reset_password_verify_otp(request):
-    """
-    1) GET -> Render a page to input identifier, OTP, new password.
-    2) POST -> Compare the user input with the session-stored OTP. If valid, reset the password.
-    """
     if request.method == 'GET':
         return render(request, 'reset_password_verify_otp.html')
 
@@ -1395,7 +1121,6 @@ def reset_password_verify_otp(request):
                 'message': 'Invalid OTP code.'
             })
 
-        # If we get here, the OTP matches. Update the user's password
         user = None
         if identifier.isdigit():
             user = UserTb.objects.filter(userID=int(identifier)).first()

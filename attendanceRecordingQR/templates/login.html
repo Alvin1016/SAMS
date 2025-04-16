@@ -206,7 +206,7 @@
 
     <script>
         document.getElementById('login-btn').addEventListener('click', function() {
-            const isStaff = document.getElementById('staff').checked;   // or student
+            const isStaff = document.getElementById('staff').checked;  
             const userType = isStaff ? 'Staff' : 'Student';
             const userIdOrEmail = document.getElementById('userIdOrEmail').value.trim();
             const password = document.getElementById('password').value.trim();
